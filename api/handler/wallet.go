@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-    "fmt"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -59,30 +59,30 @@ func (wh *WalletHandler) RemoveWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    err = wh.walletRepo.RemoveWallet(int64(client_id), int64(wallet_id))
-    if err != nil {
-        util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: err.Error()})
-        return
-    }
+	err = wh.walletRepo.RemoveWallet(int64(client_id), int64(wallet_id))
+	if err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: err.Error()})
+		return
+	}
 
-    util.RespondJson(w, http.StatusNoContent, nil)
+	util.RespondJson(w, http.StatusNoContent, nil)
 }
 
 func (wh *WalletHandler) GetWallets(w http.ResponseWriter, r *http.Request) {
-    client_id, err := strconv.Atoi(r.Header.Get("userId"))
-    if err != nil {
-        util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Missing token"})
-        return
-    }
+	client_id, err := strconv.Atoi(r.Header.Get("userId"))
+	if err != nil {
+		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Missing token"})
+		return
+	}
 
-    wallets, err := wh.walletRepo.GetWallets(int64(client_id))
-    if err != nil {
-        fmt.Printf("%v", err)
-        util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Unnexpected error"})
-        return
-    }
+	wallets, err := wh.walletRepo.GetWallets(int64(client_id))
+	if err != nil {
+		fmt.Printf("%v", err)
+		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Unnexpected error"})
+		return
+	}
 
-    util.RespondJson(w, http.StatusOK, &dto.GetWallets{Wallets: wallets})
+	util.RespondJson(w, http.StatusOK, &dto.GetWallets{Wallets: wallets})
 }
 
 /*

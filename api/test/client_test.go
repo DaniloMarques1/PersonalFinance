@@ -65,7 +65,7 @@ func addClient(t *testing.T) *httptest.ResponseRecorder {
 	}
 	response := executeRequest(req)
 
-    return response
+	return response
 }
 
 func TestSaveClient(t *testing.T) {
@@ -78,21 +78,21 @@ func TestSaveClient(t *testing.T) {
 }
 
 func TestErrorSaveClient(t *testing.T) {
-    clearTables()
+	clearTables()
 	body := []byte(`{"nam": "Fitz", "email": "fitz@gmail.com", "password": "123456"}`)
 	req, err := http.NewRequest(http.MethodPost, "/client", bytes.NewBuffer(body))
 	if err != nil {
 		t.Errorf("Error creating request %v\n", err)
 	}
 	response := executeRequest(req)
-    if response.Code != http.StatusBadRequest {
+	if response.Code != http.StatusBadRequest {
 		t.Errorf("Error saving client, expect status 400 got %v\n", response.Code)
-    }
-    addClient(t)
-    response = addClient(t)
+	}
+	addClient(t)
+	response = addClient(t)
 
-    if response.Code != http.StatusBadRequest {
+	if response.Code != http.StatusBadRequest {
 		t.Errorf("Error saving client, expect status 400 got %v\n", response.Code)
-    }
+	}
 
 }

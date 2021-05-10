@@ -1,15 +1,15 @@
 package util
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 	"os"
+	"strconv"
 	"strings"
-    "strconv"
 	"time"
 
+	"github.com/danilomarques1/personalfinance/api/dto"
 	jwt "github.com/dgrijalva/jwt-go"
-    "github.com/danilomarques1/personalfinance/api/dto"
 )
 
 type Payload struct {
@@ -38,7 +38,7 @@ func VerifyToken(tokenStr string) (int64, bool) {
 		return -1, false
 	}
 
-    payload, ok := token.Claims.(*Payload)
+	payload, ok := token.Claims.(*Payload)
 	if !ok {
 		log.Println("Not ok")
 		return -1, false
@@ -56,23 +56,23 @@ func VerifyToken(tokenStr string) (int64, bool) {
 func AuthorizationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
-        authSlice := strings.Split(authHeader, " ")
-        if len(authSlice) < 2 {
-            RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Missing authorization token"})
+		authSlice := strings.Split(authHeader, " ")
+		if len(authSlice) < 2 {
+			RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Missing authorization token"})
 			return
-        } else {
-            token := authSlice[1]
-            log.Printf("token = %v\n", token)
+		} else {
+			token := authSlice[1]
+			log.Printf("token = %v\n", token)
 
-            userId, valid := VerifyToken(token)
-            if !valid {
-                RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Invalid token"})
-                return
-            } else {
-                log.Printf("User id = %v\n", userId)
-                r.Header.Set("userId", strconv.Itoa(int(userId)))
-                next.ServeHTTP(w, r)
-            }
-        }
-    })
+			userId, valid := VerifyToken(token)
+			if !valid {
+				RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Invalid token"})
+				return
+			} else {
+				log.Printf("User id = %v\n", userId)
+				r.Header.Set("userId", strconv.Itoa(int(userId)))
+				next.ServeHTTP(w, r)
+			}
+		}
+	})
 }
