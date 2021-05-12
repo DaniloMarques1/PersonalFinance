@@ -1,1 +1,1 @@
-Logically splitting your money into wallets so you organize and can create funds to better manage your money
+Logically splitting your money into wallets so you can organize and create funds to better manage your money
