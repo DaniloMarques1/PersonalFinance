@@ -11,7 +11,7 @@ type Movement struct {
 	Wallet_id    int64     `json:"wallet_id,omitempty"`
 }
 
-type IMovemnt interface {
+type IMovement interface {
 	SaveMovement(movement *Movement) error
 	//GetMovements(wallet_id int64) (Wallet, []Movement, error)
 }

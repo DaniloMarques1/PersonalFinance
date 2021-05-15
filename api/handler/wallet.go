@@ -47,7 +47,7 @@ func (wh *WalletHandler) SaveWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.RespondJson(w, http.StatusCreated, wallet)
+        util.RespondJson(w, http.StatusCreated, &dto.CreateWalletResponse{Wallet: wallet})
 }
 
 func (wh *WalletHandler) RemoveWallet(w http.ResponseWriter, r *http.Request) {
@@ -75,14 +75,14 @@ func (wh *WalletHandler) GetWallets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wallets, err := wh.walletRepo.GetWallets(int64(client_id))
+	wallets, total, err := wh.walletRepo.GetWallets(int64(client_id))
 	if err != nil {
 		fmt.Printf("%v", err)
 		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Unnexpected error"})
 		return
 	}
 
-	util.RespondJson(w, http.StatusOK, &dto.GetWallets{Wallets: wallets})
+        util.RespondJson(w, http.StatusOK, &dto.GetWallets{Wallets: wallets, Total: total})
 }
 
 /*

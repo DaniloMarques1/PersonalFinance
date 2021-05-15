@@ -30,8 +30,7 @@ const tables = `
         id SERIAL PRIMARY KEY NOT NULL,
         name VARCHAR(60) NOT NULL,
         email VARCHAR(60) NOT NULL UNIQUE,
-        password_hash VARCHAR(100) NOT NULL,
-        total DECIMAL default 0.00
+        password_hash VARCHAR(100) NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS wallet (
@@ -39,6 +38,7 @@ const tables = `
         name VARCHAR(40) NOT NULL,
         description VARCHAR(120) NOT NULL,
         client_id INT NOT NULL,
+        created_date TIMESTAMP DEFAULT NOW(),
         CONSTRAINT fk_client_id FOREIGN KEY(client_id) REFERENCES client(id)
     );
 
@@ -46,7 +46,7 @@ const tables = `
         id SERIAL NOT NULL PRIMARY KEY,
         description VARCHAR(150),
         value DECIMAL NOT NULL,
-        deposit boolean not null default true,
+        deposit BOOLEAN NOT NULL DEFAULT TRUE,
         movement_date timestamp not null default now(),
         wallet_id INT NOT NULL,
         CONSTRAINT fk_wallet_id FOREIGN KEY(wallet_id) REFERENCES wallet(id)
@@ -80,14 +80,21 @@ func (app *App) Initialize(db DbConn) {
 	walletRepository := repository.NewWalletRepository(app.Db)
 	walletHandler := handler.NewWalletHandler(walletRepository)
 
+	//movementRepository := repository.NewMovementRepository(app.Db)
+	//movementHandler := handler.NewMovementHandler(movementRepository)
+
 	app.Router.HandleFunc("/client", clientHandler.SaveClient).Methods(http.MethodPost)
 	app.Router.HandleFunc("/session", clientHandler.CreateSession).Methods(http.MethodPost)
 
 	app.Router.Handle("/wallet", util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.SaveWallet))).Methods(http.MethodPost)
 	app.Router.Handle("/wallet/{wallet_id}", util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.RemoveWallet))).Methods(http.MethodDelete)
+
 	app.Router.Handle("/wallet/", util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.GetWallets))).Methods(http.MethodGet)
 
-	//app.Router.HandleFunc("/wallet/{id}", walletHandler.GetWallet).Methods(http.MethodGet)
+	// TODO add route to retrieve movements of a specific wallet
+
+	// TODO add routes to deposit
+	// TODO add routes to withdraw
 }
 
 // starts the web server

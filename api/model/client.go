@@ -1,11 +1,10 @@
 package model
 
 type Client struct {
-	Id           int64   `json:"id,omitempty"`
-	Name         string  `json:"name,omitempty"`
-	Email        string  `json:"email,omitempty"`
-	Total        float64 `json:"total,omitempty"`
-	PasswordHash []byte  `json:"password_hash,omitempty"`
+	Id           int64  `json:"id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Email        string `json:"email,omitempty"`
+	PasswordHash []byte `json:"password_hash,omitempty"`
 }
 
 type IClient interface {
