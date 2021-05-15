@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-        "strconv"
+	"strconv"
 
 	"github.com/danilomarques1/personalfinance/api/dto"
 	"github.com/danilomarques1/personalfinance/api/model"
@@ -24,31 +24,46 @@ func NewMovementHandler(movementRepo model.IMovement) *MovementHandler {
 }
 
 func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) {
-	// TODO
 	vars := mux.Vars(r)
-        wallet_id, err := strconv.Atoi(vars["wallet_id"])
-        if err != nil {
-                util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid wallet"})
-                return
-        }
+	wallet_id, err := strconv.Atoi(vars["wallet_id"])
+	if err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid wallet"})
+		return
+	}
 
-        fmt.Println(wallet_id)
+	fmt.Println(wallet_id)
 	var movementDto dto.AddMovementDto
-        err = json.NewDecoder(r.Body).Decode(&movementDto)
+	err = json.NewDecoder(r.Body).Decode(&movementDto)
 	if err != nil {
 		log.Fatalf("Error parsing json %v", err)
 	}
-        movement := model.Movement{
-                Description: movementDto.Description,
-                Value: movementDto.Value,
-                Wallet_id: int64(wallet_id),
-                Deposit: movementDto.Deposit,
-        }
-        err = mh.movementRepo.SaveMovement(&movement)
-        if err != nil {
-                util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: err.Error()})
-                return
-        }
+	movement := model.Movement{
+		Description: movementDto.Description,
+		Value:       movementDto.Value,
+		Wallet_id:   int64(wallet_id),
+		Deposit:     movementDto.Deposit,
+	}
+	err = mh.movementRepo.SaveMovement(&movement)
+	if err != nil {
+		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: err.Error()})
+		return
+	}
 
-	w.WriteHeader(http.StatusOK)
+	util.RespondJson(w, http.StatusCreated, &dto.AddMovementResponseDto{Movement: movement})
+}
+
+func (mh *MovementHandler) GetMovements(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	wallet_id, err := strconv.Atoi(vars["wallet_id"])
+	if err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid wallet"})
+		return
+	}
+	movements, err := mh.movementRepo.GetMovements(int64(wallet_id))
+	if err != nil {
+		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Unexpected error"})
+		return
+	}
+
+	util.RespondJson(w, http.StatusOK, &dto.GetMovements{Movements: movements})
 }

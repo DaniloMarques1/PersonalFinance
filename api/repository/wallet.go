@@ -106,7 +106,7 @@ func (wr *WalletRepository) GetWallets(client_id int64) ([]model.Wallet, float64
 	}
 
 	wallets := make([]model.Wallet, 0)
-        total := float64(0)
+	total := float64(0)
 	for rows.Next() {
 		var wallet model.Wallet
 		err = rows.Scan(&wallet.Id, &wallet.Name, &wallet.Description, &wallet.Created_date, &wallet.Client_id, &wallet.Total)
@@ -114,7 +114,7 @@ func (wr *WalletRepository) GetWallets(client_id int64) ([]model.Wallet, float64
 			return nil, 0, err
 		}
 		wallets = append(wallets, wallet)
-                total += wallet.Total
+		total += wallet.Total
 	}
 
 	return wallets, total, nil

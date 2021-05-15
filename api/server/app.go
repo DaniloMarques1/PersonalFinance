@@ -83,20 +83,26 @@ func (app *App) Initialize(db DbConn) {
 	movementRepository := repository.NewMovementRepository(app.Db)
 	movementHandler := handler.NewMovementHandler(movementRepository)
 
-	app.Router.HandleFunc("/client", clientHandler.SaveClient).Methods(http.MethodPost)
-	app.Router.HandleFunc("/session", clientHandler.CreateSession).Methods(http.MethodPost)
+	// clients endpoint
+	app.Router.HandleFunc("/client",
+		clientHandler.SaveClient).Methods(http.MethodPost)
+	app.Router.HandleFunc("/session",
+		clientHandler.CreateSession).Methods(http.MethodPost)
 
-	app.Router.Handle("/wallet", util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.SaveWallet))).Methods(http.MethodPost)
-	app.Router.Handle("/wallet/{wallet_id}", util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.RemoveWallet))).Methods(http.MethodDelete)
+	// wallets endpoint
+	app.Router.Handle("/wallet",
+                util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.SaveWallet))).Methods(http.MethodPost)
+	app.Router.Handle("/wallet/{wallet_id}",
+		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.RemoveWallet))).Methods(http.MethodDelete)
 
-	app.Router.Handle("/wallet/", util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.GetWallets))).Methods(http.MethodGet)
+	app.Router.Handle("/wallet/",
+		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.GetWallets))).Methods(http.MethodGet)
 
-        app.Router.Handle("/wallet/{wallet_id}/movement", util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.SaveMovement))).Methods(http.MethodPost)
-
-	// TODO add route to retrieve movements of a specific wallet
-
-	// TODO add routes to deposit
-	// TODO add routes to withdraw
+	// movements endpoints
+	app.Router.Handle("/wallet/{wallet_id}/movement",
+		util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.SaveMovement))).Methods(http.MethodPost)
+        app.Router.Handle("/wallet/{wallet_id}/movement",
+                util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.GetMovements))).Methods(http.MethodGet)
 }
 
 // starts the web server

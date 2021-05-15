@@ -13,5 +13,5 @@ type Movement struct {
 
 type IMovement interface {
 	SaveMovement(movement *Movement) error
-	//GetMovements(wallet_id int64) (Wallet, []Movement, error)
+	GetMovements(wallet_id int64) ([]Movement, error)
 }

@@ -32,7 +32,32 @@ func (mr *MovementRepository) SaveMovement(movement *model.Movement) error {
 	return nil
 }
 
-/*
-func GetMovements(wallet_id int64) {
+func (mr *MovementRepository) GetMovements(wallet_id int64) ([]model.Movement, error) {
+	stmt, err := mr.db.Prepare(`select id, description, deposit, value, movement_date, wallet_id 
+                                    from movement
+                                    where wallet_id = $1
+                                    order by movement_date desc`)
+	if err != nil {
+		// TODO make a better error
+		return nil, err
+	}
+
+	rows, err := stmt.Query(wallet_id)
+	if err != nil {
+		log.Printf("Error querying movements %v", err)
+		return nil, err
+	}
+	movements := make([]model.Movement, 0)
+	for rows.Next() {
+		var movement model.Movement
+		err = rows.Scan(&movement.Id, &movement.Description, &movement.Deposit, &movement.Value, &movement.MovementDate, &movement.Wallet_id)
+		if err != nil {
+			log.Printf("Error scanning %v", err)
+			return nil, err
+		}
+
+		movements = append(movements, movement)
+	}
+
+	return movements, nil
 }
-*/
