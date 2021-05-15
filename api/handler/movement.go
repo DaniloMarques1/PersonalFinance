@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -31,11 +30,12 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	fmt.Println(wallet_id)
 	var movementDto dto.AddMovementDto
 	err = json.NewDecoder(r.Body).Decode(&movementDto)
 	if err != nil {
 		log.Fatalf("Error parsing json %v", err)
+                util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid Body"})
+                return
 	}
 	movement := model.Movement{
 		Description: movementDto.Description,
