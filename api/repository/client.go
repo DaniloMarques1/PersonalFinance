@@ -43,7 +43,7 @@ func (cr *ClientRepository) FindById(id int64) (*model.Client, error) {
 	defer stmt.Close()
 
 	var client model.Client
-	err = stmt.QueryRow(id).Scan(&client.Id, &client.Name, &client.Email, &client.Total, &client.PasswordHash)
+	err = stmt.QueryRow(id).Scan(&client.Id, &client.Name, &client.Email, &client.PasswordHash)
 	if err != nil {
 		log.Printf("Error finding by id %v", err)
 		return nil, err
@@ -61,7 +61,7 @@ func (cr *ClientRepository) FindByEmail(email string) (*model.Client, error) {
 	defer stmt.Close()
 
 	var client model.Client
-	err = stmt.QueryRow(email).Scan(&client.Id, &client.Name, &client.Email, &client.PasswordHash, &client.Total)
+	err = stmt.QueryRow(email).Scan(&client.Id, &client.Name, &client.Email, &client.PasswordHash)
 	if err != nil {
 		log.Printf("Error finding email %v", err)
 		return nil, err

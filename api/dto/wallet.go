@@ -8,11 +8,16 @@ type CreateWalletDto struct {
 	Total       float64 `json:"total"`
 }
 
+type CreateWalletResponse struct {
+        Wallet model.Wallet `json:"wallet"`
+}
+
 type GetWallets struct {
 	Wallets []model.Wallet `json:"wallets"`
+	Total   float64        `json:"total"`
 }
 
 type GetWallet struct {
-	Client *model.Client `json:"client"`
-	Wallet *model.Wallet `json:"wallet"`
+	//Wallet *model.Wallet `json:"wallet"`
+	Movements []model.Movement `json:"movements"`
 }
