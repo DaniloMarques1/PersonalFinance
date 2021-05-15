@@ -47,7 +47,7 @@ func (wh *WalletHandler) SaveWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-        util.RespondJson(w, http.StatusCreated, &dto.CreateWalletResponse{Wallet: wallet})
+	util.RespondJson(w, http.StatusCreated, &dto.CreateWalletResponse{Wallet: wallet})
 }
 
 func (wh *WalletHandler) RemoveWallet(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +82,7 @@ func (wh *WalletHandler) GetWallets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-        util.RespondJson(w, http.StatusOK, &dto.GetWallets{Wallets: wallets, Total: total})
+	util.RespondJson(w, http.StatusOK, &dto.GetWallets{Wallets: wallets, Total: total})
 }
 
 /*

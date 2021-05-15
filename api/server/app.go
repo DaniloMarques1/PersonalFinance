@@ -80,8 +80,8 @@ func (app *App) Initialize(db DbConn) {
 	walletRepository := repository.NewWalletRepository(app.Db)
 	walletHandler := handler.NewWalletHandler(walletRepository)
 
-	//movementRepository := repository.NewMovementRepository(app.Db)
-	//movementHandler := handler.NewMovementHandler(movementRepository)
+	movementRepository := repository.NewMovementRepository(app.Db)
+	movementHandler := handler.NewMovementHandler(movementRepository)
 
 	app.Router.HandleFunc("/client", clientHandler.SaveClient).Methods(http.MethodPost)
 	app.Router.HandleFunc("/session", clientHandler.CreateSession).Methods(http.MethodPost)
@@ -90,6 +90,8 @@ func (app *App) Initialize(db DbConn) {
 	app.Router.Handle("/wallet/{wallet_id}", util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.RemoveWallet))).Methods(http.MethodDelete)
 
 	app.Router.Handle("/wallet/", util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.GetWallets))).Methods(http.MethodGet)
+
+        app.Router.Handle("/wallet/{wallet_id}/movement", util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.SaveMovement))).Methods(http.MethodPost)
 
 	// TODO add route to retrieve movements of a specific wallet
 

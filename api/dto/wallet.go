@@ -9,7 +9,7 @@ type CreateWalletDto struct {
 }
 
 type CreateWalletResponse struct {
-        Wallet model.Wallet `json:"wallet"`
+	Wallet model.Wallet `json:"wallet"`
 }
 
 type GetWallets struct {
