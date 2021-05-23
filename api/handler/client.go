@@ -26,7 +26,7 @@ func NewClientHandler(clientRepo model.IClient, validate *validator.Validate) *C
 }
 
 func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
-	var clientDto dto.ClientDto
+	var clientDto dto.SaveClientRequestDto
 	if err := json.NewDecoder(r.Body).Decode(&clientDto); err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
 		return
@@ -63,11 +63,11 @@ func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.RespondJson(w, http.StatusCreated, &client)
+        util.RespondJson(w, http.StatusCreated, &dto.SaveClientResponseDto{Client: client})
 }
 
 func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
-	var sessionDto dto.SessionDto
+	var sessionDto dto.SessionRequestDto
 	if err := json.NewDecoder(r.Body).Decode(&sessionDto); err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
 		return
