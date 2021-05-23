@@ -27,7 +27,7 @@ func NewWalletHandler(walletRepo model.IWallet, validate *validator.Validate) *W
 }
 
 func (wh *WalletHandler) SaveWallet(w http.ResponseWriter, r *http.Request) {
-	var walletDto dto.CreateWalletDto
+	var walletDto dto.SaveWalletRequestDto
 	if err := json.NewDecoder(r.Body).Decode(&walletDto); err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
 		return
@@ -56,7 +56,7 @@ func (wh *WalletHandler) SaveWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.RespondJson(w, http.StatusCreated, &dto.CreateWalletResponse{Wallet: wallet})
+	util.RespondJson(w, http.StatusCreated, &dto.SaveWalletResponseDto{Wallet: wallet})
 }
 
 func (wh *WalletHandler) RemoveWallet(w http.ResponseWriter, r *http.Request) {
@@ -77,40 +77,19 @@ func (wh *WalletHandler) RemoveWallet(w http.ResponseWriter, r *http.Request) {
 	util.RespondJson(w, http.StatusNoContent, nil)
 }
 
-func (wh *WalletHandler) GetWallets(w http.ResponseWriter, r *http.Request) {
+func (wh *WalletHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	client_id, err := strconv.Atoi(r.Header.Get("userId"))
 	if err != nil {
 		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Missing token"})
 		return
 	}
 
-	wallets, total, err := wh.walletRepo.GetWallets(int64(client_id))
+	wallets, total, err := wh.walletRepo.FindAll(int64(client_id))
 	if err != nil {
 		fmt.Printf("%v", err)
 		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Unnexpected error"})
 		return
 	}
 
-	util.RespondJson(w, http.StatusOK, &dto.GetWallets{Wallets: wallets, Total: total})
+	util.RespondJson(w, http.StatusOK, &dto.WalletsResponseDto{Wallets: wallets, Total: total})
 }
-
-/*
-func (wh *WalletHandler) GetWallet(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    wallet_id, _ := strconv.Atoi(vars["id"])
-    client_id, err := strconv.Atoi(r.Header.Get("token"))
-    if err != nil {
-        util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Missing token"})
-        return
-    }
-
-    client, wallet, err := wh.walletRepo.GetWallet(int64(wallet_id), int64(client_id))
-    if err != nil {
-        util.RespondJson(w, http.StatusNotFound, &dto.ErrorDto{Message: "Wallet not found"})
-        return
-    }
-
-    util.RespondJson(w, http.StatusOK, &dto.GetWallet{Client: client, Wallet: wallet})
-}
-
-*/

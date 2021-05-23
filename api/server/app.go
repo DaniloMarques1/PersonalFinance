@@ -99,7 +99,7 @@ func (app *App) Initialize(db DbConn) {
 		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.RemoveWallet))).Methods(http.MethodDelete)
 
 	app.Router.Handle("/wallet/",
-		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.GetWallets))).Methods(http.MethodGet)
+		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.FindAll))).Methods(http.MethodGet)
 
 	// movements endpoints
 	app.Router.Handle("/wallet/{wallet_id}/movement",

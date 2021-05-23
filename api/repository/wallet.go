@@ -88,7 +88,7 @@ func (wr *WalletRepository) RemoveWallet(client_id, wallet_id int64) error {
 
 // will return all wallets of a client and a total which is the summ of all
 // movements (deposit) of a wallet
-func (wr *WalletRepository) GetWallets(client_id int64) ([]model.Wallet, float64, error) {
+func (wr *WalletRepository) FindAll(client_id int64) ([]model.Wallet, float64, error) {
 	stmt, err := wr.db.Prepare(`select w.id, w.name, w.description, w.created_date, w.client_id,
                                 (select case when sum(value) >= 0 then sum(value) else 0 end from movement where wallet_id=w.id and deposit=true) -
                                 (select case when sum(value) >= 0 then sum(value) else 0 end from movement where wallet_id=w.id and deposit=false)
