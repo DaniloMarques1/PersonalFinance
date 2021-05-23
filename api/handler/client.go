@@ -28,25 +28,25 @@ func NewClientHandler(clientRepo model.IClient, validate *validator.Validate) *C
 func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 	var clientDto dto.SaveClientRequestDto
 	if err := json.NewDecoder(r.Body).Decode(&clientDto); err != nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
 
 	if err := ch.validate.Struct(clientDto); err != nil {
 		fmt.Println(err)
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
 
 	_, err := ch.clientRepo.FindByEmail(clientDto.Email)
 	if err == nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Email already taken"})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Email already taken"})
 		return
 	}
 
 	password_hash, err := bcrypt.GenerateFromPassword([]byte(clientDto.Password), bcrypt.DefaultCost)
 	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Unnexpected error"})
+		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Unnexpected error"})
 		return
 	}
 
@@ -59,7 +59,7 @@ func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 
 	err = ch.clientRepo.SaveClient(&client)
 	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Unnexpected error while adding client"})
+		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Unnexpected error while adding client"})
 		return
 	}
 
@@ -69,28 +69,28 @@ func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	var sessionDto dto.SessionRequestDto
 	if err := json.NewDecoder(r.Body).Decode(&sessionDto); err != nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
 
 	if err := ch.validate.Struct(sessionDto); err != nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
 
 	client, err := ch.clientRepo.FindByEmail(sessionDto.Email)
 	if err != nil {
-		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Invalid email"})
+		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Invalid email"})
 		return
 	}
 	if err := bcrypt.CompareHashAndPassword(client.PasswordHash, []byte(sessionDto.Password)); err != nil {
-		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Wrong password"})
+		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Wrong password"})
 		return
 	}
 
 	token, err := util.NewToken(client.Id)
 	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Error generating token"})
+		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Error generating token"})
 		fmt.Printf("%v\n", err)
 		return
 	}

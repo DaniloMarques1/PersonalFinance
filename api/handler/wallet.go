@@ -29,17 +29,17 @@ func NewWalletHandler(walletRepo model.IWallet, validate *validator.Validate) *W
 func (wh *WalletHandler) SaveWallet(w http.ResponseWriter, r *http.Request) {
 	var walletDto dto.SaveWalletRequestDto
 	if err := json.NewDecoder(r.Body).Decode(&walletDto); err != nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
 	if err := wh.validate.Struct(walletDto); err != nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
 
 	client_id, err := strconv.Atoi(r.Header.Get("userId"))
 	if err != nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Missing token"})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Missing token"})
 		return
 	}
 
@@ -52,7 +52,7 @@ func (wh *WalletHandler) SaveWallet(w http.ResponseWriter, r *http.Request) {
 
 	err = wh.walletRepo.SaveWallet(&wallet)
 	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Unnexpected error"})
+		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Unnexpected error"})
 		return
 	}
 
@@ -64,13 +64,13 @@ func (wh *WalletHandler) RemoveWallet(w http.ResponseWriter, r *http.Request) {
 	wallet_id, _ := strconv.Atoi(vars["wallet_id"])
 	client_id, err := strconv.Atoi(r.Header.Get("userId"))
 	if err != nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Missing token"})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Missing token"})
 		return
 	}
 
 	err = wh.walletRepo.RemoveWallet(int64(client_id), int64(wallet_id))
 	if err != nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: err.Error()})
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: err.Error()})
 		return
 	}
 
@@ -80,14 +80,14 @@ func (wh *WalletHandler) RemoveWallet(w http.ResponseWriter, r *http.Request) {
 func (wh *WalletHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	client_id, err := strconv.Atoi(r.Header.Get("userId"))
 	if err != nil {
-		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Missing token"})
+		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Missing token"})
 		return
 	}
 
 	wallets, total, err := wh.walletRepo.FindAll(int64(client_id))
 	if err != nil {
 		fmt.Printf("%v", err)
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorDto{Message: "Unnexpected error"})
+		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Unnexpected error"})
 		return
 	}
 

@@ -58,7 +58,7 @@ func AuthorizationMiddleware(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 		authSlice := strings.Split(authHeader, " ")
 		if len(authSlice) < 2 {
-			RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Missing authorization token"})
+			RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Missing authorization token"})
 			return
 		} else {
 			token := authSlice[1]
@@ -66,7 +66,7 @@ func AuthorizationMiddleware(next http.Handler) http.Handler {
 
 			userId, valid := VerifyToken(token)
 			if !valid {
-				RespondJson(w, http.StatusUnauthorized, &dto.ErrorDto{Message: "Invalid token"})
+				RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Invalid token"})
 				return
 			} else {
 				log.Printf("User id = %v\n", userId)
