@@ -34,7 +34,7 @@ func (mr *MovementRepository) SaveMovement(movement *model.Movement) error {
 	return nil
 }
 
-func (mr *MovementRepository) GetMovements(wallet_id int64) ([]model.Movement, error) {
+func (mr *MovementRepository) FindAll(wallet_id int64) ([]model.Movement, error) {
 	stmt, err := mr.db.Prepare(`select id, description, deposit, value, movement_date, wallet_id 
                                     from movement
                                     where wallet_id = $1
