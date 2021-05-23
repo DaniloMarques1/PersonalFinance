@@ -10,6 +10,8 @@ import (
 	"github.com/danilomarques1/personalfinance/api/repository"
 	"github.com/danilomarques1/personalfinance/api/util"
 	"github.com/gorilla/mux"
+	"github.com/go-playground/validator"
+
 )
 
 type App struct {
@@ -36,7 +38,7 @@ const tables = `
     CREATE TABLE IF NOT EXISTS wallet (
         id SERIAL PRIMARY KEY NOT NULL,
         name VARCHAR(40) NOT NULL,
-        description VARCHAR(120) NOT NULL,
+        description VARCHAR(150) NOT NULL,
         client_id INT NOT NULL,
         created_date TIMESTAMP DEFAULT NOW(),
         CONSTRAINT fk_client_id FOREIGN KEY(client_id) REFERENCES client(id)
@@ -44,7 +46,7 @@ const tables = `
 
     CREATE TABLE IF NOT EXISTS movement(
         id SERIAL NOT NULL PRIMARY KEY,
-        description VARCHAR(150),
+        description VARCHAR(100),
         value DECIMAL NOT NULL,
         deposit BOOLEAN NOT NULL DEFAULT TRUE,
         movement_date timestamp not null default now(),
@@ -73,15 +75,16 @@ func (app *App) Initialize(db DbConn) {
 		log.Fatalf("Error creating tables %v", err)
 	}
 	app.Router = mux.NewRouter()
+        validate := validator.New()
 
 	clientRepository := repository.NewClientRepository(app.Db)
-	clientHandler := handler.NewClientHandler(clientRepository)
+	clientHandler := handler.NewClientHandler(clientRepository, validate)
 
 	walletRepository := repository.NewWalletRepository(app.Db)
-	walletHandler := handler.NewWalletHandler(walletRepository)
+	walletHandler := handler.NewWalletHandler(walletRepository, validate)
 
 	movementRepository := repository.NewMovementRepository(app.Db)
-	movementHandler := handler.NewMovementHandler(movementRepository)
+	movementHandler := handler.NewMovementHandler(movementRepository, validate)
 
 	// clients endpoint
 	app.Router.HandleFunc("/client",

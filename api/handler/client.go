@@ -9,16 +9,19 @@ import (
 	"github.com/danilomarques1/personalfinance/api/model"
 	"github.com/danilomarques1/personalfinance/api/util"
 
+	"github.com/go-playground/validator"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type ClientHandler struct {
 	clientRepo model.IClient
+	validate   *validator.Validate
 }
 
-func NewClientHandler(clientRepo model.IClient) *ClientHandler {
+func NewClientHandler(clientRepo model.IClient, validate *validator.Validate) *ClientHandler {
 	return &ClientHandler{
 		clientRepo: clientRepo,
+		validate:   validate,
 	}
 }
 
@@ -29,7 +32,8 @@ func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if clientDto.Name == "" || clientDto.Email == "" || clientDto.Password == "" {
+	if err := ch.validate.Struct(clientDto); err != nil {
+		fmt.Println(err)
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
 		return
 	}
@@ -64,8 +68,12 @@ func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 
 func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	var sessionDto dto.SessionDto
-	err := json.NewDecoder(r.Body).Decode(&sessionDto)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&sessionDto); err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
+		return
+	}
+
+	if err := ch.validate.Struct(sessionDto); err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
 		return
 	}

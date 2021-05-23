@@ -10,30 +10,39 @@ import (
 	"github.com/danilomarques1/personalfinance/api/model"
 	"github.com/danilomarques1/personalfinance/api/util"
 	"github.com/gorilla/mux"
+
+	"github.com/go-playground/validator"
 )
 
 type WalletHandler struct {
 	walletRepo model.IWallet
+	validate   *validator.Validate
 }
 
-func NewWalletHandler(walletRepo model.IWallet) *WalletHandler {
+func NewWalletHandler(walletRepo model.IWallet, validate *validator.Validate) *WalletHandler {
 	return &WalletHandler{
 		walletRepo: walletRepo,
+		validate:   validate,
 	}
 }
 
 func (wh *WalletHandler) SaveWallet(w http.ResponseWriter, r *http.Request) {
 	var walletDto dto.CreateWalletDto
-	err := json.NewDecoder(r.Body).Decode(&walletDto)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&walletDto); err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
 		return
 	}
+	if err := wh.validate.Struct(walletDto); err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid body"})
+		return
+	}
+
 	client_id, err := strconv.Atoi(r.Header.Get("userId"))
 	if err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Missing token"})
 		return
 	}
+
 	wallet := model.Wallet{
 		Id:          -1,
 		Name:        walletDto.Name,

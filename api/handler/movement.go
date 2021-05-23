@@ -9,16 +9,19 @@ import (
 	"github.com/danilomarques1/personalfinance/api/dto"
 	"github.com/danilomarques1/personalfinance/api/model"
 	"github.com/danilomarques1/personalfinance/api/util"
+	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 )
 
 type MovementHandler struct {
 	movementRepo model.IMovement
+	validate     *validator.Validate
 }
 
-func NewMovementHandler(movementRepo model.IMovement) *MovementHandler {
+func NewMovementHandler(movementRepo model.IMovement, validate *validator.Validate) *MovementHandler {
 	return &MovementHandler{
 		movementRepo: movementRepo,
+		validate:     validate,
 	}
 }
 
@@ -31,12 +34,17 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var movementDto dto.AddMovementDto
-	err = json.NewDecoder(r.Body).Decode(&movementDto)
-	if err != nil {
+	if err = json.NewDecoder(r.Body).Decode(&movementDto); err != nil {
 		log.Fatalf("Error parsing json %v", err)
-                util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid Body"})
-                return
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid Body"})
+		return
 	}
+
+	if err := mh.validate.Struct(movementDto); err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorDto{Message: "Invalid Body"})
+		return
+	}
+
 	movement := model.Movement{
 		Description: movementDto.Description,
 		Value:       movementDto.Value,
@@ -65,5 +73,5 @@ func (mh *MovementHandler) GetMovements(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	util.RespondJson(w, http.StatusOK, &dto.GetMovements{Movements: movements})
+	util.RespondJson(w, http.StatusOK, &dto.MovementsResponseDto{Movements: movements})
 }
