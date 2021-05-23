@@ -3,9 +3,8 @@ package dto
 import "github.com/danilomarques1/personalfinance/api/model"
 
 type CreateWalletDto struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Total       float64 `json:"total"`
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"max=150"`
 }
 
 type CreateWalletResponse struct {
