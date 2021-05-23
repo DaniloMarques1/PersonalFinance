@@ -110,10 +110,5 @@ func (app *App) Initialize(db DbConn) {
 
 // starts the web server
 func (app *App) Start() {
-	server := &http.Server{
-		Handler: app.Router,
-		Addr:    "127.0.0.1:8080",
-	}
-
-	log.Fatal(server.ListenAndServe())
+        log.Fatal(http.ListenAndServe(":8080", app.Router))
 }
