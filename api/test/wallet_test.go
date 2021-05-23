@@ -1,20 +1,19 @@
 package test
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/danilomarques1/personalfinance/api/dto"
-	"github.com/danilomarques1/personalfinance/api/model"
 )
 
 func createAndSignInUser() (string, error) {
 	clearTables()
-	user := []byte(`{"name": "fitz", "email":"fitz@gmail.com", "password": "123456"}`)
-	request, err := http.NewRequest(http.MethodPost, "/client", bytes.NewBuffer(user))
+	user := `{"name": "fitz", "email":"fitz@gmail.com", "password": "123456"}`
+	request, err := http.NewRequest(http.MethodPost, "/client", strings.NewReader(user))
 	if err != nil {
 		return "", err
 	}
@@ -23,8 +22,8 @@ func createAndSignInUser() (string, error) {
 		return "", fmt.Errorf("Error adding a new user")
 	}
 
-	login := []byte(`{"email": "fitz@gmail.com", "password": "123456"}`)
-	request, err = http.NewRequest(http.MethodPost, "/session", bytes.NewBuffer(login))
+	login := `{"email": "fitz@gmail.com", "password": "123456"}`
+	request, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(login))
 	if err != nil {
 		return "", err
 	}
@@ -46,26 +45,27 @@ func createAndSignInUser() (string, error) {
 func TestSaveWallet(t *testing.T) {
 	token, err := createAndSignInUser()
 	if err != nil {
-		t.Errorf("Erro creating and signing user %v", err)
+		t.Fatalf("Erro creating and signing user %v", err)
 	}
-	walletBody := []byte(`{"name": "Testando 1", "description": "Description 1"}`)
-	request, err := http.NewRequest(http.MethodPost, "/wallet", bytes.NewBuffer(walletBody))
+	walletBody := `{"name": "Testando 1", "description": "Description 1"}`
+	request, err := http.NewRequest(http.MethodPost, "/wallet", strings.NewReader(walletBody))
 	if err != nil {
-		t.Errorf("Error creting wallet request %v", err)
+		t.Fatalf("Error creting wallet request %v", err)
 	}
 	request.Header.Add("Authorization", "Bearer "+token)
 	response := executeRequest(request)
 	if response.Code != http.StatusCreated {
-		t.Errorf("Wrong status code, expect 201 got %v", response.Code)
+		t.Fatalf("Wrong status code, expect 201 got %v", response.Code)
 	}
 
-	var wallet model.Wallet
-	err = json.Unmarshal(response.Body.Bytes(), &wallet)
+	var walletDto dto.SaveWalletResponseDto
+	err = json.Unmarshal(response.Body.Bytes(), &walletDto)
 	if err != nil {
-		t.Errorf("Error unmarshal wallet %v", err)
+		t.Fatalf("Error unmarshal wallet %v", err)
 	}
 
+        wallet := walletDto.Wallet
 	if wallet.Name != "Testando 1" {
-		t.Errorf("Wrong wallet returned, expect name \"Testando 1\" got %v", wallet.Name)
+		t.Fatalf("Wrong wallet returned, expect name \"Testando 1\" got %v", wallet.Name)
 	}
 }

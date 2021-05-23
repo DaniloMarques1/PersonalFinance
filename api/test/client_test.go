@@ -1,15 +1,15 @@
 package test
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
 func addClient(t *testing.T) *httptest.ResponseRecorder {
-	body := []byte(`{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456"}`)
-	req, err := http.NewRequest(http.MethodPost, "/client", bytes.NewBuffer(body))
+	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456"}`
+	req, err := http.NewRequest(http.MethodPost, "/client", strings.NewReader(body))
 	if err != nil {
 		t.Errorf("Error creating request %v\n", err)
 	}
@@ -29,8 +29,8 @@ func TestSaveClient(t *testing.T) {
 
 func TestErrorSaveClient(t *testing.T) {
 	clearTables()
-	body := []byte(`{"nam": "Fitz", "email": "fitz@gmail.com", "password": "123456"}`)
-	req, err := http.NewRequest(http.MethodPost, "/client", bytes.NewBuffer(body))
+	body := `{"nam": "Fitz", "email": "fitz@gmail.com", "password": "123456"}`
+	req, err := http.NewRequest(http.MethodPost, "/client", strings.NewReader(body))
 	if err != nil {
 		t.Errorf("Error creating request %v\n", err)
 	}
