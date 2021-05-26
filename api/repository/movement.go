@@ -23,7 +23,7 @@ func (mr *MovementRepository) SaveMovement(movement *model.Movement) error {
 		log.Printf("%v", err)
 		return err
 	}
-        defer stmt.Close()
+	defer stmt.Close()
 
 	err = stmt.QueryRow(movement.Description, movement.Value, movement.Deposit, movement.Wallet_id).Scan(&movement.Id, &movement.MovementDate)
 	if err != nil {
@@ -42,7 +42,7 @@ func (mr *MovementRepository) FindAll(wallet_id int64) ([]model.Movement, error)
 	if err != nil {
 		return nil, err
 	}
-        defer stmt.Close()
+	defer stmt.Close()
 
 	rows, err := stmt.Query(wallet_id)
 	if err != nil {

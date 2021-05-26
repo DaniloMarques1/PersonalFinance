@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/danilomarques1/personalfinance/api/dto"
@@ -33,7 +32,6 @@ func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := ch.validate.Struct(clientDto); err != nil {
-		fmt.Println(err)
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
@@ -63,7 +61,7 @@ func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-        util.RespondJson(w, http.StatusCreated, &dto.SaveClientResponseDto{Client: client})
+	util.RespondJson(w, http.StatusCreated, &dto.SaveClientResponseDto{Client: client})
 }
 
 func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +89,6 @@ func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	token, err := util.NewToken(client.Id)
 	if err != nil {
 		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Error generating token"})
-		fmt.Printf("%v\n", err)
 		return
 	}
 

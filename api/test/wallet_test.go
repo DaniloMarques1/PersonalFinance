@@ -64,7 +64,7 @@ func TestSaveWallet(t *testing.T) {
 		t.Fatalf("Error unmarshal wallet %v", err)
 	}
 
-        wallet := walletDto.Wallet
+	wallet := walletDto.Wallet
 	if wallet.Name != "Testando 1" {
 		t.Fatalf("Wrong wallet returned, expect name \"Testando 1\" got %v", wallet.Name)
 	}

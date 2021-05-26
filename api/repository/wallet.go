@@ -104,6 +104,7 @@ func (wr *WalletRepository) FindAll(client_id int64) ([]model.Wallet, float64, e
 		log.Printf("error querying the rows %v\n", err)
 		return nil, 0, err
 	}
+	defer rows.Close()
 
 	wallets := make([]model.Wallet, 0)
 	total := float64(0)

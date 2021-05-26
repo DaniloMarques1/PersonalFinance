@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 	})
 
 	code := m.Run()
-	clearTables()
+	//clearTables()
 	os.Exit(code)
 }
 
