@@ -59,6 +59,29 @@ func TestErrorSaveClient(t *testing.T) {
 
 func TestCreateSession(t *testing.T) {
 	clearTables()
+        addClient(t)
+
+        assert := assert.New(t)
+	body := `{"email": "fitz@gmail.com", "password": "123456"}`
+
+        req, err := http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
+	if err != nil {
+		t.Fatalf("Error creating request %v", err)
+	}
+        response := executeRequest(req)
+
+	assert.Equal(http.StatusOK, response.Code, "Should return 200 when creating a new session")
+
+	var sessionResponse dto.SessionResponseDto
+	json.Unmarshal(response.Body.Bytes(), &sessionResponse)
+
+	assert.NotNil(sessionResponse.Token, "When creating a session should return a token")
+	assert.NotNil(sessionResponse.Client, "When creating a session should return the client")
+
+}
+
+func TestErrorCreateSession(t *testing.T) {
+	clearTables()
 	assert := assert.New(t)
 
 	body := `{"email": "fitz@gmail.com", "password": "123456"}`
@@ -70,27 +93,12 @@ func TestCreateSession(t *testing.T) {
 	response := executeRequest(req)
 	assert.Equal(http.StatusUnauthorized, response.Code, "Should return a unauthorized status")
 
-	addClient(t)
-
-	req, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
-	if err != nil {
-		t.Fatalf("Error creating request %v", err)
-	}
-	response = executeRequest(req)
-
-	assert.Equal(http.StatusOK, response.Code, "Should return 200 when creating a new session")
-
-	var sessionResponse dto.SessionResponseDto
-	json.Unmarshal(response.Body.Bytes(), &sessionResponse)
-
-	assert.NotNil(sessionResponse.Token, "When creating a session should return a token")
-	assert.NotNil(sessionResponse.Client, "When creating a session should return the client")
-
 	body = `{"email": "", "password": ""}`
 	req, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
 	if err != nil {
 		t.Fatalf("Error creating request %v", err)
 	}
+
 	response = executeRequest(req)
 	assert.Equal(http.StatusBadRequest, response.Code, "Should return bad request")
 }
