@@ -39,11 +39,25 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid Body"})
 		return
 	}
+	defer r.Body.Close()
 
 	if err := mh.validate.Struct(movementDto); err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid Body"})
 		return
 	}
+
+        if !movementDto.Deposit {
+                canWithDraw, err := mh.movementRepo.CanWithDraw(int64(wallet_id), movementDto.Value)
+                if err != nil {
+                        util.RespondJson(w, http.StatusInternalServerError, "Unnexpected error")
+                        return
+                }
+
+                if !canWithDraw {
+                        util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "You don't have enough to withdraw"})
+                        return
+                }
+        }
 
 	movement := model.Movement{
 		Description: movementDto.Description,
@@ -51,6 +65,7 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 		Wallet_id:   int64(wallet_id),
 		Deposit:     movementDto.Deposit,
 	}
+
 	err = mh.movementRepo.SaveMovement(&movement)
 	if err != nil {
 		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: err.Error()})

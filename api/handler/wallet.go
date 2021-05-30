@@ -32,6 +32,8 @@ func (wh *WalletHandler) SaveWallet(w http.ResponseWriter, r *http.Request) {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
+	defer r.Body.Close()
+
 	if err := wh.validate.Struct(walletDto); err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
@@ -83,6 +85,7 @@ func (wh *WalletHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Missing token"})
 		return
 	}
+        defer r.Body.Close()
 
 	wallets, total, err := wh.walletRepo.FindAll(int64(client_id))
 	if err != nil {
