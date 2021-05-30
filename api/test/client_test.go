@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -12,18 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func addClient(t *testing.T) *httptest.ResponseRecorder {
-	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456"}`
-	req, err := http.NewRequest(http.MethodPost, "/client", strings.NewReader(body))
-	if err != nil {
-		t.Errorf("Error creating request %v\n", err)
-	}
-	response := executeRequest(req)
-
-	return response
-}
-
 func TestSaveClient(t *testing.T) {
+	clearTables()
 	response := addClient(t)
 
 	assert.Equal(t, http.StatusCreated, response.Code, fmt.Sprintf("Error saving client, expect 201 got %v", response.Code))
@@ -59,16 +48,16 @@ func TestErrorSaveClient(t *testing.T) {
 
 func TestCreateSession(t *testing.T) {
 	clearTables()
-        addClient(t)
+	addClient(t)
 
-        assert := assert.New(t)
+	assert := assert.New(t)
 	body := `{"email": "fitz@gmail.com", "password": "123456"}`
 
-        req, err := http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
+	req, err := http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
 	if err != nil {
 		t.Fatalf("Error creating request %v", err)
 	}
-        response := executeRequest(req)
+	response := executeRequest(req)
 
 	assert.Equal(http.StatusOK, response.Code, "Should return 200 when creating a new session")
 

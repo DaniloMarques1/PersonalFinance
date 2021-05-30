@@ -62,14 +62,12 @@ func AuthorizationMiddleware(next http.Handler) http.Handler {
 			return
 		} else {
 			token := authSlice[1]
-			log.Printf("token = %v\n", token)
 
 			userId, valid := VerifyToken(token)
 			if !valid {
 				RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Invalid token"})
 				return
 			} else {
-				log.Printf("User id = %v\n", userId)
 				r.Header.Set("userId", strconv.Itoa(int(userId)))
 				next.ServeHTTP(w, r)
 			}

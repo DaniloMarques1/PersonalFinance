@@ -55,7 +55,7 @@ func (cr *ClientRepository) FindById(id int64) (*model.Client, error) {
 func (cr *ClientRepository) FindByEmail(email string) (*model.Client, error) {
 	stmt, err := cr.Db.Prepare("select * from client where email = $1")
 	if err != nil {
-		log.Printf("Error prepating statement %v", err)
+		log.Printf("Error preparing statement %v", err)
 		return nil, err
 	}
 	defer stmt.Close()
