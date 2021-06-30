@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+    title: Personal Finance API
+    description: >
+        This is the documentation of the endpoints for the personal finance api.
+    version: 0.0.1
+
+paths:
+    /client:
+        post:
+            summary: Endpoint used to create a new user
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            $ref: '#/components/schemas/ClientRequest'
+
+            responses:
+                '201':
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ClientResponse'
+components:
+    schemas:
+        Client:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    minimum: 1
+                    description: Client id
+                name:
+                    type: string
+                    maxLength: 60
+                    description: Client name
+                email:
+                    type: string
+                    maxLength: 60
+                    description: Client email
+                password:
+                    type: string
+                    maxLength: 20
+                    description: Client password
+            required:
+                - id
+                - name
+                - email
+                - password
+        ClientRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    maxLength: 60
+                    description: Client name
+                email:
+                    type: string
+                    maxLength: 60
+                    description: Client email
+                password:
+                    type: string
+                    maxLength: 20
+                    description: Client password
+            required:
+                - name
+                - email
+                - password
+        ClientResponse:
+            type: object
+            properties:
+                client:
+                    $ref: '#/components/schemas/Client'
+
+            required:
+                - client
