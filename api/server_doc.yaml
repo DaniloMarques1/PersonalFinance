@@ -1,20 +1,29 @@
-openapi: 3.0.0
+openapi: 3.0.1
 info:
     title: Personal Finance API
     description: >
         This is the documentation of the endpoints for the personal finance api.
     version: 0.0.1
 
+tags:
+    - name: Client
+      description: Endpoints that deal with creation and session of clients.
+    - name: Wallet
+      description: Endpoint that deal with wallets
+    - name: Movement
+      description: Endpoint that deal with movements
+    
 paths:
     /client:
         post:
+            tags:
+                - Client
             summary: Endpoint used to create a new user
             requestBody:
                 required: true
                 content:
                     application/json:
                         schema:
-                            type: object
                             $ref: '#/components/schemas/ClientRequest'
 
             responses:
@@ -24,8 +33,216 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ClientResponse'
+                '400':
+                    description: If any data in body was wrong
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                '401':
+                    description: If the email was already taken
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+
+    /session:
+        post:
+            tags:
+                - Client
+            summary: Endpoint to sign in a user
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref:  '#/components/schemas/SessionRequest'
+            responses:
+                '200':
+                    description: Successfuly logged in
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SessionResponse'
+                '400':
+                    description: Wrong password/email
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+
+    /wallet:
+        post:
+            tags:
+                - Wallet
+            summary: Create a new wallet
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateWalletRequest'
+            responses:
+                '201':
+                    description: Wallet created with sucess
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateWalletResponse'
+                '400':
+                    description: If any body data is wrong
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+
+                '401':
+                    description: If the token is wrong
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+        get:
+            security:
+                - BearerAuth: []
+            tags:
+                - Wallet
+            summary: Return all users wallet
+            responses:
+                '200':
+                    description: Return all the wallets of a user
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetWalletsResponse'
+                '401':
+                    description: Wrong token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+    /wallet/{wallet_id}:
+        get:
+            security:
+                - BearerAuth: []
+            tags:
+                - Wallet
+            parameters:
+                - in: path
+                  name: wallet_id
+                  required: true
+                  description: Wallet numeric id
+                  schema:
+                      type: integer
+            responses:
+                '200':
+                    description: Return the wallet specified by the ID
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetWalletResponse'
+                '401':
+                    description: If the wrong token was given
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                '404':
+                    description: If no wallet was found with the given id
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+
+    /wallet/{wallet_id}/movements:
+        post:
+            security:
+                - BearerAuth: []
+            tags:
+                - Movement
+            parameters:
+                - in: path
+                  name: wallet_id
+                  required: true
+                  schema:
+                      type: integer
+
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateMovementRequest'
+            responses:
+                '201':
+                    description: Created the movement
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateMovementResponse'
+                '400':
+                    description: If any body data was given incorrectly
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                '401':
+                    description: Wrong token was given
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                '404':
+                    description: If no wallet was found with the given id
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                    
+        get:
+            summary: Return all movements sorted by movement_date, ascending order
+            tags:
+                - Movement
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: wallet_id
+                  required: true
+                  description: Wallet id
+                  schema:
+                      type: integer
+            responses:
+                '200':
+                    description: Return all movements from the specified wallet
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetMovementsResponse'
+                '401':
+                    description: If a invalid token was given 
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                '404':
+                    description: If no wallet was found with the given wallet_id
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
 components:
     schemas:
+        ErrorResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+            required:
+                - message
+
         Client:
             type: object
             properties:
@@ -44,7 +261,7 @@ components:
                 password:
                     type: string
                     maxLength: 20
-                    description: Client password
+                    description: Client password, should be hashed before saving
             required:
                 - id
                 - name
@@ -77,3 +294,124 @@ components:
 
             required:
                 - client
+        SessionRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    maxLength: 60
+                password:
+                    type: string
+                    maxLength: 20
+                    minLength: 6
+            required:
+                - email
+                - password
+        SessionResponse:
+            type: object
+            properties:
+                token:
+                    type: string
+                client:
+                    $ref: '#/components/schemas/Client'
+        Wallet:
+            type: object
+            properties:
+                id:
+                    type: integer
+                name:
+                    type: string
+                description:
+                    type: string
+                total:
+                    type: number
+                created_date:
+                        type: string
+                        format: date-time
+                client_id:
+                    type: integer
+
+
+        CreateWalletRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    maxLength: 40
+                description:
+                    type: string
+                    maxLength: 150
+            required:
+                - name
+                - description
+        CreateWalletResponse:
+            type: object
+            properties:
+                wallet:
+                    $ref: '#/components/schemas/Wallet'
+        GetWalletsResponse:
+            type: object
+            properties:
+                total: 
+                    type: integer
+                wallets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Wallet'
+        GetWalletResponse:
+            type: object
+            properties:
+                wallet:
+                    $ref: '#/components/schemas/Wallet'
+        Movement:
+            type: object
+            properties:
+                id:
+                    type: integer
+                description:
+                    type: string
+                    maxLength: 60
+                deposit:
+                    type: boolean
+                value:
+                    type: number
+                movement_date:
+                    type: string
+                    format: date-time
+                wallet_id:
+                    type: integer
+            required:
+                - id
+                - description
+                - deposit
+                - value
+                - movement_date
+                - wallet_id
+
+        CreateMovementRequest:
+            type: object
+            properties:
+                description:
+                    type: string
+                    maxLength: 60
+                deposit:
+                    type: boolean
+                value:
+                    type: number
+        CreateMovementResponse:
+            type: object
+            properties:
+                movement:
+                    $ref: '#/components/schemas/Movement'
+        GetMovementsResponse:
+            type: object
+            properties:
+                movements:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Movement'
+                
+    securitySchemes:
+        BearerAuth:
+            type: http
+            scheme: bearer
