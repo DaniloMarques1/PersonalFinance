@@ -46,6 +46,34 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ErrorResponse'
 
+        put:
+            security:
+                - BearerAuth: []
+            tags:
+                - Client
+            summary: Updates a client information
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ClientUpdateRequest'
+            responses:
+                '204':
+                    description: Successfuly updated the client
+                '400':
+                    description: If any body data is invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                '401':
+                    description: If the given token was invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+
     /session:
         post:
             tags:
@@ -136,6 +164,7 @@ paths:
                   description: Wallet numeric id
                   schema:
                       type: integer
+            summary: Return a specific wallet
             responses:
                 '200':
                     description: Return the wallet specified by the ID
@@ -155,6 +184,76 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ErrorResponse'
+        delete:
+            security:
+                - BearerAuth: []
+            tags:
+                - Wallet
+            parameters:
+                - in: path
+                  required: true
+                  name: wallet_id
+                  description: Wallet numeric id
+                  schema:
+                      type: integer
+            summary: Delete a specific wallet
+            responses:
+                '204':
+                    description: Successfuly deleted an wallet
+                '401':
+                    description: if the given token is wrong
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                '404':
+                    description: If no wallet wallet was found with the given id
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+
+        put:
+            summary: Updates a specific wallet
+            security:
+                - BearerAuth: []
+            tags:
+                - Wallet
+            parameters:
+                - in: path
+                  name: wallet_id
+                  required: true
+                  description: Numeric id of an wallet
+                  schema:
+                      type: integer
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/WalletUpdateRequest'
+            responses:
+                '204':
+                    description: Successfuly updated an wallet
+                '400':
+                    description: If any body data was invalid
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                '401':
+                    description: If the given token was wrong
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+                '404':
+                    description: If no wallet was found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorResponse'
+
 
     /wallet/{wallet_id}/movements:
         post:
@@ -168,7 +267,7 @@ paths:
                   required: true
                   schema:
                       type: integer
-
+            summary: Create a new movement to a specific wallet
             requestBody:
                 required: true
                 content:
@@ -314,6 +413,26 @@ components:
                     type: string
                 client:
                     $ref: '#/components/schemas/Client'
+
+        ClientUpdateRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    maxLength: 60
+                password:
+                    type: string
+                    minLength: 6
+                    maxLength: 20
+                confirm_password:
+                    type: string
+                    minLength: 6
+                    maxLength: 20
+            required:
+                - email
+                - password
+                - confirm_password
+
         Wallet:
             type: object
             properties:
@@ -323,8 +442,6 @@ components:
                     type: string
                 description:
                     type: string
-                total:
-                    type: number
                 created_date:
                         type: string
                         format: date-time
@@ -353,7 +470,7 @@ components:
             type: object
             properties:
                 total: 
-                    type: integer
+                    type: number
                 wallets:
                     type: array
                     items:
@@ -363,6 +480,20 @@ components:
             properties:
                 wallet:
                     $ref: '#/components/schemas/Wallet'
+
+        WalletUpdateRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    maxLength: 40
+                description:
+                    type: string
+                    maxLength: 150
+            required:
+                - name
+                - description
+
         Movement:
             type: object
             properties:
