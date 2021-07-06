@@ -2,25 +2,25 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/danilomarques1/personalfinance/api/dto"
-	"github.com/danilomarques1/personalfinance/api/model"
+	"github.com/danilomarques1/personalfinance/api/service"
 	"github.com/danilomarques1/personalfinance/api/util"
 
 	"github.com/go-playground/validator"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type ClientHandler struct {
-	clientRepo model.IClient
-	validate   *validator.Validate
+	clientService *service.ClientService
+	validate      *validator.Validate
 }
 
-func NewClientHandler(clientRepo model.IClient, validate *validator.Validate) *ClientHandler {
+func NewClientHandler(clientService *service.ClientService, validate *validator.Validate) *ClientHandler {
 	return &ClientHandler{
-		clientRepo: clientRepo,
-		validate:   validate,
+		clientService: clientService,
+		validate:      validate,
 	}
 }
 
@@ -37,33 +37,14 @@ func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := ch.clientRepo.FindByEmail(clientDto.Email)
-	if err == nil {
-		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Email already taken"})
-		return
-	}
-
-	password_hash, err := bcrypt.GenerateFromPassword([]byte(clientDto.Password), bcrypt.DefaultCost)
+	clientResponse, err := ch.clientService.SaveClient(clientDto)
 	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Unnexpected error"})
+		log.Printf("Error saving a client %v", err)
+		util.HandleError(w, err)
 		return
 	}
 
-	client := model.Client{
-		Id:           -1,
-		Name:         clientDto.Name,
-		Email:        clientDto.Email,
-		PasswordHash: password_hash,
-	}
-
-	err = ch.clientRepo.SaveClient(&client)
-	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError,
-			&dto.ErrorResponseDto{Message: "Unnexpected error while adding client"})
-		return
-	}
-
-	util.RespondJson(w, http.StatusCreated, &dto.SaveClientResponseDto{Client: client})
+	util.RespondJson(w, http.StatusCreated, clientResponse)
 }
 
 func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
@@ -79,21 +60,11 @@ func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client, err := ch.clientRepo.FindByEmail(sessionDto.Email)
+	sessionResponse, err := ch.clientService.CreateSession(sessionDto)
 	if err != nil {
-		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Invalid email"})
-		return
-	}
-	if err := bcrypt.CompareHashAndPassword(client.PasswordHash, []byte(sessionDto.Password)); err != nil {
-		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Wrong password"})
+		util.HandleError(w, err)
 		return
 	}
 
-	token, err := util.NewToken(client.Id)
-	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Error generating token"})
-		return
-	}
-
-	util.RespondJson(w, http.StatusOK, &dto.SessionResponseDto{Client: client, Token: token})
+	util.RespondJson(w, http.StatusOK, sessionResponse)
 }

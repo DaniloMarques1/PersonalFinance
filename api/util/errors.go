@@ -12,19 +12,6 @@ func NewApiError(message string, code int) *ApiError {
 	}
 }
 
-func (apiError *ApiError) Error() string {
+func (apiError ApiError) Error() string {
 	return apiError.Message
 }
-
-/*
-type EmailAlreadyTaken struct {
-        ApiError
-}
-
-func NewEmailAlreadyTaken(message string, code int) *EmailAlreadyTaken {
-        return &EmailAlreadyTaken{
-                Message: message,
-                Code: code,
-        }
-}
-*/

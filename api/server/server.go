@@ -8,10 +8,10 @@ import (
 
 	"github.com/danilomarques1/personalfinance/api/handler"
 	"github.com/danilomarques1/personalfinance/api/repository"
+	"github.com/danilomarques1/personalfinance/api/service"
 	"github.com/danilomarques1/personalfinance/api/util"
-	"github.com/gorilla/mux"
 	"github.com/go-playground/validator"
-
+	"github.com/gorilla/mux"
 )
 
 type App struct {
@@ -75,10 +75,12 @@ func (app *App) Initialize(db DbConn) {
 		log.Fatalf("Error creating tables %v", err)
 	}
 	app.Router = mux.NewRouter()
-        validate := validator.New()
+	validate := validator.New()
 
 	clientRepository := repository.NewClientRepository(app.Db)
-	clientHandler := handler.NewClientHandler(clientRepository, validate)
+	clientService := service.NewClientService(clientRepository)
+	//clientHandler := handler.NewClientHandler(clientRepository, validate)
+	clientHandler := handler.NewClientHandler(clientService, validate)
 
 	walletRepository := repository.NewWalletRepository(app.Db)
 	walletHandler := handler.NewWalletHandler(walletRepository, validate)
@@ -94,7 +96,7 @@ func (app *App) Initialize(db DbConn) {
 
 	// wallets endpoint
 	app.Router.Handle("/wallet",
-                util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.SaveWallet))).Methods(http.MethodPost)
+		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.SaveWallet))).Methods(http.MethodPost)
 	app.Router.Handle("/wallet/{wallet_id}",
 		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.RemoveWallet))).Methods(http.MethodDelete)
 
@@ -105,11 +107,11 @@ func (app *App) Initialize(db DbConn) {
 	app.Router.Handle("/wallet/{wallet_id}/movement",
 		util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.SaveMovement))).Methods(http.MethodPost)
 
-        app.Router.Handle("/wallet/{wallet_id}/movement",
-                util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.FindAll))).Methods(http.MethodGet)
+	app.Router.Handle("/wallet/{wallet_id}/movement",
+		util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.FindAll))).Methods(http.MethodGet)
 }
 
 // starts the web server
 func (app *App) Start() {
-        log.Fatal(http.ListenAndServe(":8080", app.Router))
+	log.Fatal(http.ListenAndServe(":8080", app.Router))
 }

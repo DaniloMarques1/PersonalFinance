@@ -2,7 +2,10 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+
+	"github.com/danilomarques1/personalfinance/api/dto"
 )
 
 type Error struct {
@@ -10,18 +13,18 @@ type Error struct {
 }
 
 func RespondJson(w http.ResponseWriter, statusCode int, body interface{}) {
+	fmt.Println(statusCode)
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(&body)
 }
 
-// TODO how to handle errors
-
 func HandleError(w http.ResponseWriter, err error) {
 	switch err.(type) {
-	case ApiError:
-                RespondJson(w, err.Code, dto.ErrorResponse{Message: err.Message})
+	case *ApiError:
+		apiError := err.(*ApiError)
+		RespondJson(w, apiError.Code, dto.ErrorResponseDto{Message: apiError.Message})
 	default:
-		RespondJson(w, http.StatusInternalServerError, dto.ErrorResponse{Message: "Unexpected error"})
+		RespondJson(w, http.StatusInternalServerError, dto.ErrorResponseDto{Message: "Unexpected error"})
 	}
 }

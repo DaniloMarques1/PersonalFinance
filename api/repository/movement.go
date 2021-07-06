@@ -35,26 +35,26 @@ func (mr *MovementRepository) SaveMovement(movement *model.Movement) error {
 }
 
 func (mr *MovementRepository) CanWithDraw(wallet_id int64, value float64) (bool, error) {
-        stmt, err := mr.db.Prepare(`
+	stmt, err := mr.db.Prepare(`
                 select sum(value) from movement where deposit = true and wallet_id = $1
         `)
-        if err != nil {
-                log.Printf("%v", err)
-                return false, err
-        }
-        defer stmt.Close()
-        var total float64
-        log.Printf("%v", wallet_id)
-        err = stmt.QueryRow(wallet_id).Scan(&total)
-        if err != nil {
-                log.Printf("%v", err)
-                return false, err
-        }
-        if value < total {
-                return true, nil
-        }
+	if err != nil {
+		log.Printf("%v", err)
+		return false, err
+	}
+	defer stmt.Close()
+	var total float64
+	log.Printf("%v", wallet_id)
+	err = stmt.QueryRow(wallet_id).Scan(&total)
+	if err != nil {
+		log.Printf("%v", err)
+		return false, err
+	}
+	if value < total {
+		return true, nil
+	}
 
-        return false, nil
+	return false, nil
 
 }
 
