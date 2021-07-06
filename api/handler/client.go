@@ -58,7 +58,8 @@ func (ch *ClientHandler) SaveClient(w http.ResponseWriter, r *http.Request) {
 
 	err = ch.clientRepo.SaveClient(&client)
 	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Unnexpected error while adding client"})
+		util.RespondJson(w, http.StatusInternalServerError,
+			&dto.ErrorResponseDto{Message: "Unnexpected error while adding client"})
 		return
 	}
 
@@ -71,7 +72,7 @@ func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
-        defer r.Body.Close()
+	defer r.Body.Close()
 
 	if err := ch.validate.Struct(sessionDto); err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})

@@ -39,8 +39,8 @@ const tables = `
         id SERIAL PRIMARY KEY NOT NULL,
         name VARCHAR(40) NOT NULL,
         description VARCHAR(150) NOT NULL,
-        client_id INT NOT NULL,
         created_date TIMESTAMP DEFAULT NOW(),
+        client_id INT NOT NULL,
         CONSTRAINT fk_client_id FOREIGN KEY(client_id) REFERENCES client(id)
     );
 
@@ -104,6 +104,7 @@ func (app *App) Initialize(db DbConn) {
 	// movements endpoints
 	app.Router.Handle("/wallet/{wallet_id}/movement",
 		util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.SaveMovement))).Methods(http.MethodPost)
+
         app.Router.Handle("/wallet/{wallet_id}/movement",
                 util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.FindAll))).Methods(http.MethodGet)
 }

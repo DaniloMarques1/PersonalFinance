@@ -46,18 +46,18 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-        if !movementDto.Deposit {
-                canWithDraw, err := mh.movementRepo.CanWithDraw(int64(wallet_id), movementDto.Value)
-                if err != nil {
-                        util.RespondJson(w, http.StatusInternalServerError, "Unnexpected error")
-                        return
-                }
+	if !movementDto.Deposit {
+		canWithDraw, err := mh.movementRepo.CanWithDraw(int64(wallet_id), movementDto.Value)
+		if err != nil {
+			util.RespondJson(w, http.StatusInternalServerError, "Unnexpected error")
+			return
+		}
 
-                if !canWithDraw {
-                        util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "You don't have enough to withdraw"})
-                        return
-                }
-        }
+		if !canWithDraw {
+			util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "You don't have enough to withdraw"})
+			return
+		}
+	}
 
 	movement := model.Movement{
 		Description: movementDto.Description,

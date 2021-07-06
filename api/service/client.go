@@ -1,38 +1,33 @@
 package service
 
 import (
-        "database/sql"
-        "fmt"
-        "net/http"
+	"database/sql"
+	"fmt"
+	"net/http"
 
-        "github.com/danilomarques1/personalfinance/api/model"
-        "github.com/danilomarques1/personalfinance/api/dto"
+	"github.com/danilomarques1/personalfinance/api/dto"
+	"github.com/danilomarques1/personalfinance/api/model"
+	"github.com/danilomarques1/personalfinance/api/util"
 )
 
 type ClientService struct {
-        clientRepo model.IClient
-}
-
-type UnauthorizedError struct {
-        error
+	clientRepo model.IClient
 }
 
 func NewClientService(clientRepo model.IClient) *ClientService {
-        return &ClientService{
-                clientRepo: clientRepo,
-        }
+	return &ClientService{
+		clientRepo: clientRepo,
+	}
 }
 
 func (cs *ClientService) SaveClient(clientDto dto.ClientDto) (*dto.ClientDtoResponse, error) {
-	_, err := ch.clientRepo.FindByEmail(clientDto.Email)
+	_, err := cs.clientRepo.FindByEmail(clientDto.Email)
 	if err == nil {
-                // TODO return a different error becasue this one is nil
-		return nil, err
+		return nil, util.NewApiError("Email already used", http.StatusBadRequest)
 	}
 
 	password_hash, err := bcrypt.GenerateFromPassword([]byte(clientDto.Password), bcrypt.DefaultCost)
 	if err != nil {
-                // TODO format error message
 		return nil, err
 	}
 
@@ -45,9 +40,8 @@ func (cs *ClientService) SaveClient(clientDto dto.ClientDto) (*dto.ClientDtoResp
 
 	err = ch.clientRepo.SaveClient(&client)
 	if err != nil {
-                // TODO format error message
 		return nil, err
 	}
 
-        return &dto.ClientResponse{Client: client}, nil
+	return &dto.ClientResponse{Client: client}, nil
 }

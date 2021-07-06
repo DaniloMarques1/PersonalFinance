@@ -85,7 +85,7 @@ func (wh *WalletHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Missing token"})
 		return
 	}
-        defer r.Body.Close()
+	defer r.Body.Close()
 
 	wallets, total, err := wh.walletRepo.FindAll(int64(client_id))
 	if err != nil {

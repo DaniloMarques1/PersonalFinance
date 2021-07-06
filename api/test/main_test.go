@@ -20,7 +20,7 @@ var App server.App
 func TestMain(m *testing.M) {
 	App.Initialize(server.DbConn{
 		Host:     "0.0.0.0",
-		Port:     "5433",
+		Port:     "5432",
 		User:     "fitz",
 		Password: "123456",
 		DbName:   "personalwallet",
