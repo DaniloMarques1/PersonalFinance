@@ -1,7 +1,7 @@
 package service
 
 import (
-        "log"
+	"log"
 
 	"github.com/danilomarques1/personalfinance/api/dto"
 	"github.com/danilomarques1/personalfinance/api/model"
@@ -36,9 +36,18 @@ func (ws *WalletService) SaveWallet(walletDto dto.SaveWalletRequestDto, client_i
 func (ws *WalletService) RemoveWallet(wallet_id, client_id int64) error {
 	err := ws.walletRepo.RemoveWallet(wallet_id, client_id)
 	if err != nil {
-                log.Printf("Error calling repository %v", err)
+		log.Printf("Error calling repository %v", err)
 		return err
 	}
 
 	return nil
+}
+
+func (ws *WalletService) FindAll(client_id int64) (*dto.WalletsResponseDto, error) {
+	wallets, total, err := ws.walletRepo.FindAll(client_id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.WalletsResponseDto{Wallets: wallets, Total: total}, nil
 }

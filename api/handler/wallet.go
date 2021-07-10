@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -70,7 +71,6 @@ func (wh *WalletHandler) RemoveWallet(w http.ResponseWriter, r *http.Request) {
 	util.RespondJson(w, http.StatusNoContent, nil)
 }
 
-/*
 func (wh *WalletHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	client_id, err := strconv.Atoi(r.Header.Get("userId"))
 	if err != nil {
@@ -79,13 +79,12 @@ func (wh *WalletHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	wallets, total, err := wh.walletRepo.FindAll(int64(client_id))
+	walletsResponse, err := wh.walletService.FindAll(int64(client_id))
 	if err != nil {
-		fmt.Printf("%v", err)
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Unnexpected error"})
+		log.Printf("Error searching wallets %v", err)
+		util.HandleError(w, err)
 		return
 	}
 
-	util.RespondJson(w, http.StatusOK, &dto.WalletsResponseDto{Wallets: wallets, Total: total})
+        util.RespondJson(w, http.StatusOK, walletsResponse)
 }
-*/
