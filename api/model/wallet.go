@@ -12,7 +12,8 @@ type Wallet struct {
 }
 
 type IWallet interface {
-	SaveWallet(wallet *Wallet) error
-	RemoveWallet(client_id, wallet_id int64) error
-	FindAll(client_id int64) ([]Wallet, float64, error)
+	SaveWallet(*Wallet) error
+	RemoveWallet(int64, int64) error
+	FindAll(int64) ([]Wallet, float64, error)
+	FindById(int64, int64) (*Wallet, error)
 }

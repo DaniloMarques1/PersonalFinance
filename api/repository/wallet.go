@@ -2,10 +2,11 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/danilomarques1/personalfinance/api/model"
+	"github.com/danilomarques1/personalfinance/api/util"
 )
 
 type WalletRepository struct {
@@ -37,7 +38,7 @@ func (wr *WalletRepository) SaveWallet(wallet *model.Wallet) error {
 }
 
 // will remove a client wallet and its associated movements
-func (wr *WalletRepository) RemoveWallet(client_id, wallet_id int64) error {
+func (wr *WalletRepository) RemoveWallet(wallet_id, client_id int64) error {
 	tx, err := wr.db.Begin()
 	if err != nil {
 		log.Printf("Error opening transaction %v\n", err)
@@ -45,7 +46,7 @@ func (wr *WalletRepository) RemoveWallet(client_id, wallet_id int64) error {
 	}
 
 	// cleaning the movements of this specific wallet
-	stmt, err := tx.Prepare("delete from movement where wallet_id = $1")
+	stmt, err := tx.Prepare("DELETE FROM movement WHERE wallet_id = $1")
 	if err != nil {
 		log.Printf("Error preparing query %v\n", err)
 		tx.Rollback()
@@ -60,25 +61,26 @@ func (wr *WalletRepository) RemoveWallet(client_id, wallet_id int64) error {
 		return err
 	}
 
-	stmt, err = tx.Prepare("delete from wallet where id = $1")
+	stmt, err = tx.Prepare("DELETE FROM wallet WHERE id = $1 AND client_id = $2")
 	if err != nil {
 		log.Printf("Error preparing query %v\n", err)
 		tx.Rollback()
-		return fmt.Errorf("Internal server error")
+		return err
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(wallet_id)
+	result, err := stmt.Exec(wallet_id, client_id)
 	if err != nil {
-		log.Printf("erro removing wallet %v\n", err)
+		log.Printf("error removing wallet %v\n", err)
 		tx.Rollback()
-		return fmt.Errorf("Internal server error")
+		return err
 	}
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected < 1 {
 		tx.Rollback()
-		return fmt.Errorf("Wallet with this id does not exist")
+                log.Printf("Rows affected %v", rowsAffected)
+		return util.NewApiError("Wallet not found", http.StatusNotFound)
 	}
 
 	tx.Commit()
@@ -96,9 +98,11 @@ func (wr *WalletRepository) FindAll(client_id int64) ([]model.Wallet, float64, e
                                 from wallet as w
                                 where client_id=$1`)
 	if err != nil {
+                log.Printf("Error preparing findAll query %v", err)
 		return nil, 0, err
 	}
 	defer stmt.Close()
+
 	rows, err := stmt.Query(client_id)
 	if err != nil {
 		log.Printf("error querying the rows %v\n", err)
@@ -107,11 +111,12 @@ func (wr *WalletRepository) FindAll(client_id int64) ([]model.Wallet, float64, e
 	defer rows.Close()
 
 	wallets := make([]model.Wallet, 0)
-	total := float64(0)
+        var total float64
 	for rows.Next() {
 		var wallet model.Wallet
 		err = rows.Scan(&wallet.Id, &wallet.Name, &wallet.Description, &wallet.Created_date, &wallet.Client_id, &wallet.Total)
 		if err != nil {
+                        log.Printf("Error scanning rows %v", err)
 			return nil, 0, err
 		}
 		wallets = append(wallets, wallet)
@@ -119,4 +124,23 @@ func (wr *WalletRepository) FindAll(client_id int64) ([]model.Wallet, float64, e
 	}
 
 	return wallets, total, nil
+}
+
+func (wr *WalletRepository) FindById(wallet_id, client_id int64) (*model.Wallet, error) {
+	stmt, err := wr.db.Prepare("SELECT id FROM wallet WHERE id = $1 AND client_id = $2)")
+	if err != nil {
+                log.Printf("Error preparing find by id %v", err)
+		return nil, err
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(wallet_id, client_id)
+	var wallet model.Wallet
+	err = row.Scan(&wallet.Id)
+	if err != nil {
+                log.Printf("Error scanning row %v", err)
+		return nil, err
+	}
+
+	return &wallet, nil
 }

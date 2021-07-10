@@ -2,6 +2,7 @@ package test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -50,4 +51,21 @@ func TestErrorSaveWallet(t *testing.T) {
 	response = executeRequest(request)
 	require.Equal(t, http.StatusUnauthorized, response.Code)
 
+}
+
+func TestRemoveWallet(t *testing.T) {
+	clearTables()
+	token, err := createAndSignInUser(t)
+	require.Nil(t, err, "Should have created and signed the user")
+	require.NotEqual(t, token, "", "Should have returned a token")
+
+	wallet_id, err := addWallet(token)
+	require.Nil(t, err, "Error should be nil")
+	require.NotEqual(t, -1, wallet_id, "Id should not be -1")
+
+	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/wallet/%v", wallet_id), nil)
+	require.Nil(t, err, "Error creating request")
+	request.Header.Add("Authorization", "Bearer "+token)
+	response := executeRequest(request)
+	require.Equal(t, http.StatusNoContent, response.Code)
 }

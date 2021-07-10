@@ -71,6 +71,7 @@ func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	return rr
 }
 
+// TODO remove parameter
 // returns a token
 func createAndSignInUser(t *testing.T) (string, error) {
 	clearTables()
@@ -94,4 +95,27 @@ func createAndSignInUser(t *testing.T) (string, error) {
 	}
 
 	return session.Token, nil
+}
+
+func addWallet(token string) (int64, error) {
+	body := `{"name":"Lista do natal", "description": "Carteira onde será o salvo dinheiro do natal"}`
+	request, err := http.NewRequest(http.MethodPost, "/wallet", strings.NewReader(body))
+	if err != nil {
+		return -1, err
+	}
+	request.Header.Add("Authorization", "Bearer "+token)
+
+	response := executeRequest(request)
+	if response.Code != http.StatusCreated {
+		return -1, fmt.Errorf("Wrong status returned")
+	}
+
+	var walletResponse dto.SaveWalletResponseDto
+	err = json.Unmarshal(response.Body.Bytes(), &walletResponse)
+	if err != nil {
+		return -1, err
+	}
+	wallet_id := walletResponse.Wallet.Id
+
+	return wallet_id, nil
 }

@@ -82,7 +82,7 @@ func (app *App) Initialize(db DbConn) {
 	clientHandler := handler.NewClientHandler(clientService, validate)
 
 	walletRepository := repository.NewWalletRepository(app.Db)
-        walletService := service.NewWalletService(walletRepository)
+	walletService := service.NewWalletService(walletRepository)
 	walletHandler := handler.NewWalletHandler(walletService, validate)
 
 	movementRepository := repository.NewMovementRepository(app.Db)
@@ -97,8 +97,8 @@ func (app *App) Initialize(db DbConn) {
 	// wallets endpoint
 	app.Router.Handle("/wallet",
 		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.SaveWallet))).Methods(http.MethodPost)
-	//app.Router.Handle("/wallet/{wallet_id}",
-	//	util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.RemoveWallet))).Methods(http.MethodDelete)
+	app.Router.Handle("/wallet/{wallet_id}",
+		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.RemoveWallet))).Methods(http.MethodDelete)
 	//app.Router.Handle("/wallet/",
 	//	util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.FindAll))).Methods(http.MethodGet)
 
