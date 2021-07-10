@@ -86,5 +86,5 @@ func (wh *WalletHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-        util.RespondJson(w, http.StatusOK, walletsResponse)
+	util.RespondJson(w, http.StatusOK, walletsResponse)
 }

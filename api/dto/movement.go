@@ -4,7 +4,7 @@ import "github.com/danilomarques1/personalfinance/api/model"
 
 type AddMovementDto struct {
 	Description string  `json:"description" validate:"max=100""`
-	Deposit     bool    `json:"deposit" validate:"required"`
+	Deposit     bool    `json:"deposit"`
 	Value       float64 `json:"value" validate:"required,gt=0"`
 }
 

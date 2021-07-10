@@ -79,7 +79,7 @@ func (wr *WalletRepository) RemoveWallet(wallet_id, client_id int64) error {
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected < 1 {
 		tx.Rollback()
-                log.Printf("Rows affected %v", rowsAffected)
+		log.Printf("Rows affected %v", rowsAffected)
 		return util.NewApiError("Wallet not found", http.StatusNotFound)
 	}
 
@@ -98,7 +98,7 @@ func (wr *WalletRepository) FindAll(client_id int64) ([]model.Wallet, float64, e
                                 from wallet as w
                                 where client_id=$1`)
 	if err != nil {
-                log.Printf("Error preparing findAll query %v", err)
+		log.Printf("Error preparing findAll query %v", err)
 		return nil, 0, err
 	}
 	defer stmt.Close()
@@ -111,12 +111,12 @@ func (wr *WalletRepository) FindAll(client_id int64) ([]model.Wallet, float64, e
 	defer rows.Close()
 
 	wallets := make([]model.Wallet, 0)
-        var total float64
+	var total float64
 	for rows.Next() {
 		var wallet model.Wallet
 		err = rows.Scan(&wallet.Id, &wallet.Name, &wallet.Description, &wallet.Created_date, &wallet.Client_id, &wallet.Total)
 		if err != nil {
-                        log.Printf("Error scanning rows %v", err)
+			log.Printf("Error scanning rows %v", err)
 			return nil, 0, err
 		}
 		wallets = append(wallets, wallet)
@@ -129,7 +129,7 @@ func (wr *WalletRepository) FindAll(client_id int64) ([]model.Wallet, float64, e
 func (wr *WalletRepository) FindById(wallet_id, client_id int64) (*model.Wallet, error) {
 	stmt, err := wr.db.Prepare("SELECT id FROM wallet WHERE id = $1 AND client_id = $2)")
 	if err != nil {
-                log.Printf("Error preparing find by id %v", err)
+		log.Printf("Error preparing find by id %v", err)
 		return nil, err
 	}
 	defer stmt.Close()
@@ -138,7 +138,7 @@ func (wr *WalletRepository) FindById(wallet_id, client_id int64) (*model.Wallet,
 	var wallet model.Wallet
 	err = row.Scan(&wallet.Id)
 	if err != nil {
-                log.Printf("Error scanning row %v", err)
+		log.Printf("Error scanning row %v", err)
 		return nil, err
 	}
 

@@ -7,21 +7,21 @@ import (
 	"strconv"
 
 	"github.com/danilomarques1/personalfinance/api/dto"
-	"github.com/danilomarques1/personalfinance/api/model"
+	"github.com/danilomarques1/personalfinance/api/service"
 	"github.com/danilomarques1/personalfinance/api/util"
 	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 )
 
 type MovementHandler struct {
-	movementRepo model.IMovement
-	validate     *validator.Validate
+	movementService *service.MovementService
+	validate        *validator.Validate
 }
 
-func NewMovementHandler(movementRepo model.IMovement, validate *validator.Validate) *MovementHandler {
+func NewMovementHandler(movementService *service.MovementService, validate *validator.Validate) *MovementHandler {
 	return &MovementHandler{
-		movementRepo: movementRepo,
-		validate:     validate,
+		movementService: movementService,
+		validate:        validate,
 	}
 }
 
@@ -42,41 +42,20 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 	defer r.Body.Close()
 
 	if err := mh.validate.Struct(movementDto); err != nil {
+                log.Printf("Error validating struct %v\n", err)
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid Body"})
 		return
 	}
 
-        // TODO move to service
-
-	if !movementDto.Deposit {
-		canWithDraw, err := mh.movementRepo.CanWithDraw(int64(wallet_id), movementDto.Value)
-		if err != nil {
-                        util.HandleError(w, err)
-			return
-		}
-
-		if !canWithDraw {
-			util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "You don't have enough to withdraw"})
-			return
-		}
-	}
-
-	movement := model.Movement{
-		Description: movementDto.Description,
-		Value:       movementDto.Value,
-		Wallet_id:   int64(wallet_id),
-		Deposit:     movementDto.Deposit,
-	}
-
-	err = mh.movementRepo.SaveMovement(&movement)
+	movementResponse, err := mh.movementService.SaveMovement(movementDto, int64(wallet_id))
 	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: err.Error()})
-		return
+		util.HandleError(w, err)
 	}
 
-	util.RespondJson(w, http.StatusCreated, &dto.AddMovementResponseDto{Movement: movement})
+	util.RespondJson(w, http.StatusCreated, movementResponse)
 }
 
+/*
 func (mh *MovementHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	wallet_id, err := strconv.Atoi(vars["wallet_id"])
@@ -92,3 +71,4 @@ func (mh *MovementHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 
 	util.RespondJson(w, http.StatusOK, &dto.MovementsResponseDto{Movements: movements})
 }
+*/

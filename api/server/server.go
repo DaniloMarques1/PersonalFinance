@@ -86,7 +86,8 @@ func (app *App) Initialize(db DbConn) {
 	walletHandler := handler.NewWalletHandler(walletService, validate)
 
 	movementRepository := repository.NewMovementRepository(app.Db)
-	movementHandler := handler.NewMovementHandler(movementRepository, validate)
+	movementService := service.NewMovementService(movementRepository)
+	movementHandler := handler.NewMovementHandler(movementService, validate)
 
 	// clients endpoint
 	app.Router.HandleFunc("/client",
@@ -99,15 +100,15 @@ func (app *App) Initialize(db DbConn) {
 		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.SaveWallet))).Methods(http.MethodPost)
 	app.Router.Handle("/wallet/{wallet_id}",
 		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.RemoveWallet))).Methods(http.MethodDelete)
-	//app.Router.Handle("/wallet/",
-	//	util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.FindAll))).Methods(http.MethodGet)
+	app.Router.Handle("/wallet/",
+		util.AuthorizationMiddleware(http.HandlerFunc(walletHandler.FindAll))).Methods(http.MethodGet)
 
 	// movements endpoints
 	app.Router.Handle("/wallet/{wallet_id}/movement",
 		util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.SaveMovement))).Methods(http.MethodPost)
 
-	app.Router.Handle("/wallet/{wallet_id}/movement",
-		util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.FindAll))).Methods(http.MethodGet)
+	//app.Router.Handle("/wallet/{wallet_id}/movement",
+	//	util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.FindAll))).Methods(http.MethodGet)
 }
 
 // starts the web server
