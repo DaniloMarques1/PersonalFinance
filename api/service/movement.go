@@ -44,3 +44,12 @@ func (ms *MovementService) SaveMovement(movementDto dto.AddMovementDto, wallet_i
 
 	return &movementResponse, nil
 }
+
+func (ms *MovementService) FindAll(wallet_id int64) (*dto.MovementsResponseDto, error) {
+	movements, err := ms.movementRepo.FindAll(wallet_id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.MovementsResponseDto{Movements: movements}, nil
+}

@@ -106,9 +106,8 @@ func (app *App) Initialize(db DbConn) {
 	// movements endpoints
 	app.Router.Handle("/wallet/{wallet_id}/movement",
 		util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.SaveMovement))).Methods(http.MethodPost)
-
-	//app.Router.Handle("/wallet/{wallet_id}/movement",
-	//	util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.FindAll))).Methods(http.MethodGet)
+	app.Router.Handle("/wallet/{wallet_id}/movement",
+		util.AuthorizationMiddleware(http.HandlerFunc(movementHandler.FindAll))).Methods(http.MethodGet)
 }
 
 // starts the web server

@@ -55,7 +55,6 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 	util.RespondJson(w, http.StatusCreated, movementResponse)
 }
 
-/*
 func (mh *MovementHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	wallet_id, err := strconv.Atoi(vars["wallet_id"])
@@ -63,12 +62,11 @@ func (mh *MovementHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid wallet"})
 		return
 	}
-	movements, err := mh.movementRepo.FindAll(int64(wallet_id))
+	movementsResponse, err := mh.movementService.FindAll(int64(wallet_id))
 	if err != nil {
-		util.RespondJson(w, http.StatusInternalServerError, &dto.ErrorResponseDto{Message: "Unexpected error"})
+		util.HandleError(w, err)
 		return
 	}
 
-	util.RespondJson(w, http.StatusOK, &dto.MovementsResponseDto{Movements: movements})
+	util.RespondJson(w, http.StatusOK, movementsResponse)
 }
-*/
