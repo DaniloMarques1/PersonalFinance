@@ -13,13 +13,14 @@ import (
 
 func TestSaveMovement(t *testing.T) {
 	clearTables()
+	require := require.New(t)
 
 	token, err := createAndSignInUser(t)
-	require := require.New(t)
 	require.Nil(err, "Should return token")
 
-	wallet_id, err := addWallet(token)
-	require.Nil(err, "Shout have created wallet")
+	walletResponse, err := addWallet(token)
+	require.Nil(err, "Should have created wallet")
+	wallet_id := walletResponse.Wallet.Id
 
 	movementBody := `{"description": "Primeiro deposito", "value": 45.0, "deposit": true}`
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/wallet/%v/movement", wallet_id), strings.NewReader(movementBody))
@@ -38,12 +39,14 @@ func TestSaveMovement(t *testing.T) {
 
 func TestErrorSaveMovement(t *testing.T) {
 	clearTables()
-	token, err := createAndSignInUser(t)
 	require := require.New(t)
+
+	token, err := createAndSignInUser(t)
 	require.Nil(err, "Should return token")
 
-	wallet_id, err := addWallet(token)
+	walletResponse, err := addWallet(token)
 	require.Nil(err, "Should have created wallet")
+	wallet_id := walletResponse.Wallet.Id
 
 	movementBody := `{"description": "Primeiro deposito", "value": 45.0, "deposit": false}`
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/wallet/%v/movement", wallet_id), strings.NewReader(movementBody))

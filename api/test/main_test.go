@@ -31,6 +31,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
+// will delete all data in the database
 func clearTables() {
 	tx, err := App.Db.Begin()
 	if err != nil {
@@ -53,17 +54,20 @@ func clearTables() {
 	tx.Commit()
 }
 
+// will add a new client and return its dto
 func addClient(t *testing.T) *httptest.ResponseRecorder {
 	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456"}`
 	req, err := http.NewRequest(http.MethodPost, "/client", strings.NewReader(body))
 	if err != nil {
 		t.Errorf("Error creating request %v\n", err)
+		t.FailNow()
 	}
 	response := executeRequest(req)
 
 	return response
 }
 
+// execute a request
 func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	App.Router.ServeHTTP(rr, request)
@@ -71,7 +75,6 @@ func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	return rr
 }
 
-// TODO remove parameter
 // returns a token
 func createAndSignInUser(t *testing.T) (string, error) {
 	clearTables()
@@ -97,25 +100,25 @@ func createAndSignInUser(t *testing.T) (string, error) {
 	return session.Token, nil
 }
 
-func addWallet(token string) (int64, error) {
+// add a new wallet
+func addWallet(token string) (*dto.SaveWalletResponseDto, error) {
 	body := `{"name":"Lista do natal", "description": "Carteira onde será o salvo dinheiro do natal"}`
 	request, err := http.NewRequest(http.MethodPost, "/wallet", strings.NewReader(body))
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 	request.Header.Add("Authorization", "Bearer "+token)
 
 	response := executeRequest(request)
 	if response.Code != http.StatusCreated {
-		return -1, fmt.Errorf("Wrong status returned")
+		return nil, fmt.Errorf("Wrong status returned")
 	}
 
 	var walletResponse dto.SaveWalletResponseDto
 	err = json.Unmarshal(response.Body.Bytes(), &walletResponse)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
-	wallet_id := walletResponse.Wallet.Id
 
-	return wallet_id, nil
+	return &walletResponse, nil
 }

@@ -46,10 +46,12 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+        // TODO move to service
+
 	if !movementDto.Deposit {
 		canWithDraw, err := mh.movementRepo.CanWithDraw(int64(wallet_id), movementDto.Value)
 		if err != nil {
-			util.RespondJson(w, http.StatusInternalServerError, "Unnexpected error")
+                        util.HandleError(w, err)
 			return
 		}
 

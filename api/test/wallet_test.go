@@ -55,17 +55,21 @@ func TestErrorSaveWallet(t *testing.T) {
 
 func TestRemoveWallet(t *testing.T) {
 	clearTables()
-	token, err := createAndSignInUser(t)
-	require.Nil(t, err, "Should have created and signed the user")
-	require.NotEqual(t, token, "", "Should have returned a token")
+	require := require.New(t)
 
-	wallet_id, err := addWallet(token)
-	require.Nil(t, err, "Error should be nil")
-	require.NotEqual(t, -1, wallet_id, "Id should not be -1")
+	token, err := createAndSignInUser(t)
+	require.Nil(err, "Should have created and signed the user")
+	require.NotEqual(token, "", "Should have returned a token")
+
+	walletResponse, err := addWallet(token)
+	require.Nil(err, "Error should be nil")
+	require.NotNil(walletResponse, "Id should not be -1")
+	wallet_id := walletResponse.Wallet.Id
 
 	request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/wallet/%v", wallet_id), nil)
-	require.Nil(t, err, "Error creating request")
+	require.Nil(err, "Error creating request")
 	request.Header.Add("Authorization", "Bearer "+token)
 	response := executeRequest(request)
-	require.Equal(t, http.StatusNoContent, response.Code)
+
+	require.Equal(http.StatusNoContent, response.Code)
 }

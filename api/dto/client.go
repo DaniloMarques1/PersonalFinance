@@ -7,7 +7,7 @@ import (
 type SaveClientRequestDto struct {
 	Name     string `json:"name" validate:"required,max=60"`
 	Email    string `json:"email" validate:"required,email,max=60"`
-	Password string `json:"password" validate:"required,min=6,max=20"` // TODO verificar tamanho (len) de um hash com password de 20
+	Password string `json:"password" validate:"required,min=6,max=20"`
 }
 
 type SaveClientResponseDto struct {

@@ -15,8 +15,3 @@ type WalletsResponseDto struct {
 	Wallets []model.Wallet `json:"wallets"`
 	Total   float64        `json:"total"`
 }
-
-// TODO not being used (remove?), it is being used the MovementsResponseDto instead
-type WalletResponseDto struct {
-	Movements []model.Movement `json:"movements"`
-}
