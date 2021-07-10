@@ -35,7 +35,7 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 
 	var movementDto dto.AddMovementDto
 	if err = json.NewDecoder(r.Body).Decode(&movementDto); err != nil {
-		log.Fatalf("Error parsing json %v", err)
+		log.Printf("Error parsing json %v", err)
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid Body"})
 		return
 	}
@@ -50,6 +50,7 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 	movementResponse, err := mh.movementService.SaveMovement(movementDto, int64(wallet_id))
 	if err != nil {
 		util.HandleError(w, err)
+		return
 	}
 
 	util.RespondJson(w, http.StatusCreated, movementResponse)

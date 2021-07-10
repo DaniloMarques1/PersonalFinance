@@ -19,6 +19,9 @@ func NewMovementService(movementRepo model.IMovement) *MovementService {
 }
 
 func (ms *MovementService) SaveMovement(movementDto dto.AddMovementDto, wallet_id int64) (*dto.AddMovementResponseDto, error) {
+
+	// TODO check if there is a wallet for this client based on wallet_id and client_id
+
 	if !movementDto.Deposit {
 		canWithDraw, err := ms.movementRepo.CanWithDraw(wallet_id, movementDto.Value)
 		if err != nil {
