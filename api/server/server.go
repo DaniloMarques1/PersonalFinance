@@ -94,6 +94,8 @@ func (app *App) Initialize(db DbConn) {
 		clientHandler.SaveClient).Methods(http.MethodPost)
 	app.Router.HandleFunc("/session",
 		clientHandler.CreateSession).Methods(http.MethodPost)
+	app.Router.HandleFunc("/client",
+		clientHandler.UpdateClient).Methods(http.MethodPut)
 
 	// wallets endpoint
 	app.Router.Handle("/wallet",

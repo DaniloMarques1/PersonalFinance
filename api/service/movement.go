@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/danilomarques1/personalfinance/api/dto"
@@ -40,6 +41,7 @@ func (ms *MovementService) SaveMovement(movementDto dto.AddMovementDto, wallet_i
 	}
 	err := ms.movementRepo.SaveMovement(&movement)
 	if err != nil {
+		log.Printf("Error saving movement %v\n", err)
 		return nil, err
 	}
 

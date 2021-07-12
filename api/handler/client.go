@@ -68,3 +68,24 @@ func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 
 	util.RespondJson(w, http.StatusOK, sessionResponse)
 }
+
+func (ch *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
+	var updateClientDto dto.UpdateClientRequestDto
+	if err := json.NewDecoder(r.Body).Decode(&updateClientDto); err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
+		return
+	}
+	defer r.Body.Close()
+
+	if err := ch.validate.Struct(updateClientDto); err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
+		return
+	}
+	err := ch.clientService.UpdateClient(updateClientDto)
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

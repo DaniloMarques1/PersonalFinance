@@ -67,3 +67,7 @@ func (cs *ClientService) CreateSession(sessionDto dto.SessionRequestDto) (*dto.S
 
 	return &dto.SessionResponseDto{Client: client, Token: token}, nil
 }
+
+func (cs *ClientService) UpdateClient(updateClientDto dto.UpdateClientRequestDto) error {
+	return nil
+}

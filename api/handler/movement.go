@@ -42,7 +42,7 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 	defer r.Body.Close()
 
 	if err := mh.validate.Struct(movementDto); err != nil {
-                log.Printf("Error validating struct %v\n", err)
+		log.Printf("Error validating struct %v\n", err)
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid Body"})
 		return
 	}

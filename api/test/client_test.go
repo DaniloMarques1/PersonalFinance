@@ -83,3 +83,19 @@ func TestErrorCreateSession(t *testing.T) {
 	response = executeRequest(req)
 	require.Equal(http.StatusBadRequest, response.Code, "Should return bad request")
 }
+
+func TestUpdateClient(t *testing.T) {
+	clearTables()
+	require := require.New(t)
+
+	response := addClient(t)
+	require.Equal(response.Code, http.StatusCreated, "Status should be 201")
+
+	body := `{"name": "Fitz Calvary", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
+
+	request, err := http.NewRequest(http.MethodPut, "/client", strings.NewReader(body))
+	require.Nil(err, "Error Should be nil")
+
+	response = executeRequest(request)
+	require.Equal(response.Code, http.StatusNoContent, "Status should be 204")
+}
