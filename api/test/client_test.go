@@ -13,7 +13,7 @@ import (
 
 func TestSaveClient(t *testing.T) {
 	clearTables()
-	response := addClient(t)
+	response := addClient(t, "Fitz", "fitz@gmail.com", "123456")
 
 	require.Equal(t, http.StatusCreated, response.Code, fmt.Sprintf("Error saving client, expect 201 got %v", response.Code))
 }
@@ -30,8 +30,8 @@ func TestErrorSaveClient(t *testing.T) {
 
 	require.Equal(http.StatusBadRequest, response.Code, "Should not register an user passing an invalid body")
 
-	addClient(t)
-	response = addClient(t)
+	addClient(t, "Fitz", "fitz@gmail.com", "123456")
+	response = addClient(t, "Fitz", "fitz@gmail.com", "123456")
 
 	require.Equal(http.StatusBadRequest, response.Code, "Should not let register the client using the same email")
 
@@ -45,7 +45,7 @@ func TestErrorSaveClient(t *testing.T) {
 
 func TestCreateSession(t *testing.T) {
 	clearTables()
-	addClient(t)
+	addClient(t, "Fitz", "fitz@gmail.com", "123456")
 
 	require := require.New(t)
 	body := `{"email": "fitz@gmail.com", "password": "123456"}`
@@ -71,14 +71,14 @@ func TestErrorCreateSession(t *testing.T) {
 
 	body := `{"email": "fitz@gmail.com", "password": "123456"}`
 	req, err := http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
-        require.Nil(err, "Err shoudl be nil")
+	require.Nil(err, "Err shoudl be nil")
 
 	response := executeRequest(req)
 	require.Equal(http.StatusUnauthorized, response.Code, "Should return a unauthorized status")
 
 	body = `{"email": "", "password": ""}`
 	req, err = http.NewRequest(http.MethodPost, "/session", strings.NewReader(body))
-        require.Nil(err, "Err shoudl be nil")
+	require.Nil(err, "Err shoudl be nil")
 
 	response = executeRequest(req)
 	require.Equal(http.StatusBadRequest, response.Code, "Should return bad request")
@@ -88,7 +88,7 @@ func TestUpdateClient(t *testing.T) {
 	clearTables()
 	require := require.New(t)
 
-	response := addClient(t)
+	response := addClient(t, "Fitz", "fitz@gmail.com", "123456")
 	require.Equal(response.Code, http.StatusCreated, "Status should be 201")
 
 	body := `{"name": "Fitz Calvary", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`

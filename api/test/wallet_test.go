@@ -12,7 +12,8 @@ import (
 )
 
 func TestSaveWallet(t *testing.T) {
-	token, err := createAndSignInUser(t)
+	addClient(t, "Fitz", "fitz@gmail.com", "123456")
+	token, err := signIn("fitz@gmail.com", "123456")
 
 	require.Nil(t, err, "Should create a user")
 
@@ -34,8 +35,8 @@ func TestSaveWallet(t *testing.T) {
 }
 
 func TestErrorSaveWallet(t *testing.T) {
-	token, err := createAndSignInUser(t)
-	require.Nil(t, err, "Should create a user")
+	addClient(t, "Fitz", "fitz@gmail.com", "123456")
+	token, err := signIn("fitz@gmail.com", "123456")
 
 	walletBody := `{"name": "", "description": "Description 1"}`
 	request, err := http.NewRequest(http.MethodPost, "/wallet", strings.NewReader(walletBody))
@@ -57,7 +58,8 @@ func TestRemoveWallet(t *testing.T) {
 	clearTables()
 	require := require.New(t)
 
-	token, err := createAndSignInUser(t)
+	addClient(t, "Fitz", "fitz@gmail.com", "123456")
+	token, err := signIn("fitz@gmail.com", "123456")
 	require.Nil(err, "Should have created and signed the user")
 	require.NotEqual(token, "", "Should have returned a token")
 

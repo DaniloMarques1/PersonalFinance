@@ -55,8 +55,8 @@ func clearTables() {
 }
 
 // will add a new client and return its dto
-func addClient(t *testing.T) *httptest.ResponseRecorder {
-	body := `{"name": "Fitz", "email": "fitz@gmail.com", "password": "123456"}`
+func addClient(t *testing.T, name, email, password string) *httptest.ResponseRecorder {
+	body := fmt.Sprintf(`{"name": "%v", "email": "%v", "password": "%v"}`, name, email, password)
 	req, err := http.NewRequest(http.MethodPost, "/client", strings.NewReader(body))
 	if err != nil {
 		t.Errorf("Error creating request %v\n", err)
@@ -76,12 +76,9 @@ func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 }
 
 // returns a token
-func createAndSignInUser(t *testing.T) (string, error) {
-	clearTables()
-	addClient(t)
-
-	login := `{"email": "fitz@gmail.com", "password": "123456"}`
-	request, err := http.NewRequest(http.MethodPost, "/session", strings.NewReader(login))
+func signIn(email, password string) (string, error) {
+	loginBody := fmt.Sprintf(`{"email": "%v", "password": "%v"}`, email, password)
+	request, err := http.NewRequest(http.MethodPost, "/session", strings.NewReader(loginBody))
 	if err != nil {
 		return "", err
 	}
