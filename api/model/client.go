@@ -11,4 +11,5 @@ type IClient interface {
 	SaveClient(client *Client) error
 	FindById(id int64) (*Client, error)
 	FindByEmail(email string) (*Client, error)
+	UpdateClient(*Client) error
 }

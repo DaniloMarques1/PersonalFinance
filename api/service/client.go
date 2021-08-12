@@ -68,6 +68,27 @@ func (cs *ClientService) CreateSession(sessionDto dto.SessionRequestDto) (*dto.S
 	return &dto.SessionResponseDto{Client: client, Token: token}, nil
 }
 
-func (cs *ClientService) UpdateClient(updateClientDto dto.UpdateClientRequestDto) error {
+func (cs *ClientService) UpdateClient(clientId int64, updateClientDto dto.UpdateClientRequestDto) error {
+	if updateClientDto.Password != updateClientDto.ConfirmPassword {
+		return util.NewApiError("Password and confirm password does not match", http.StatusBadRequest)
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(updateClientDto.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	client := Client{
+		Id: clientId,
+		Name: updateClientDto.Name,
+		Email: updateClientDto.Email,
+		PasswordHash: passwordHash,
+	}
+
+	err := cs.clientRepo.UpdateClient(&client)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

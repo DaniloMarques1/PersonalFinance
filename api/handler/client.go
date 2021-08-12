@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/danilomarques1/personalfinance/api/dto"
 	"github.com/danilomarques1/personalfinance/api/service"
@@ -81,7 +82,11 @@ func (ch *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
-	err := ch.clientService.UpdateClient(updateClientDto)
+	clientId, err := strconv.Atoi(r.Header.Get("client_id"))
+	if err != nil {
+		//
+	}
+	err := ch.clientService.UpdateClient(clientId, updateClientDto)
 	if err != nil {
 		util.HandleError(w, err)
 		return

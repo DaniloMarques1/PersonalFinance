@@ -8,17 +8,17 @@ import (
 )
 
 type ClientRepository struct {
-	Db *sql.DB
+	db *sql.DB
 }
 
 func NewClientRepository(db *sql.DB) *ClientRepository {
 	return &ClientRepository{
-		Db: db,
+		db: db,
 	}
 }
 
 func (cr *ClientRepository) SaveClient(client *model.Client) error {
-	stmt, err := cr.Db.Prepare("insert into client(name, email, password_hash) values($1, $2, $3) returning id")
+	stmt, err := cr.db.Prepare("insert into client(name, email, password_hash) values($1, $2, $3) returning id")
 	if err != nil {
 		log.Printf("%v", err)
 		return err
@@ -35,7 +35,7 @@ func (cr *ClientRepository) SaveClient(client *model.Client) error {
 }
 
 func (cr *ClientRepository) FindById(id int64) (*model.Client, error) {
-	stmt, err := cr.Db.Prepare("select * from client where id = $1")
+	stmt, err := cr.db.Prepare("select * from client where id = $1")
 	if err != nil {
 		log.Printf("Error prepating statement %v", err)
 		return nil, err
@@ -53,7 +53,7 @@ func (cr *ClientRepository) FindById(id int64) (*model.Client, error) {
 }
 
 func (cr *ClientRepository) FindByEmail(email string) (*model.Client, error) {
-	stmt, err := cr.Db.Prepare("select * from client where email = $1")
+	stmt, err := cr.db.Prepare("select * from client where email = $1")
 	if err != nil {
 		log.Printf("Error preparing statement %v", err)
 		return nil, err
@@ -68,4 +68,19 @@ func (cr *ClientRepository) FindByEmail(email string) (*model.Client, error) {
 	}
 
 	return &client, nil
+}
+
+func (cr *ClientRepository) UpdateClient(client *model.Client) error {
+	stmt, err := cr.db.Prepare("update client set name = $1, email = $2, password = $3 where client_id = $4")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(client.Name, client.Email, client.PasswordHash, client.Id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
