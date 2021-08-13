@@ -86,8 +86,9 @@ func (ch *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		//
 	}
-	err := ch.clientService.UpdateClient(clientId, updateClientDto)
+	err = ch.clientService.UpdateClient(int64(clientId), updateClientDto)
 	if err != nil {
+		log.Printf("error %v\n", err)
 		util.HandleError(w, err)
 		return
 	}

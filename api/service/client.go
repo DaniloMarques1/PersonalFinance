@@ -78,14 +78,14 @@ func (cs *ClientService) UpdateClient(clientId int64, updateClientDto dto.Update
 		return err
 	}
 
-	client := Client{
+	client := model.Client{
 		Id: clientId,
 		Name: updateClientDto.Name,
 		Email: updateClientDto.Email,
 		PasswordHash: passwordHash,
 	}
 
-	err := cs.clientRepo.UpdateClient(&client)
+	err = cs.clientRepo.UpdateClient(&client)
 	if err != nil {
 		return err
 	}

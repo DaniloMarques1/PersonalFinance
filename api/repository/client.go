@@ -71,7 +71,7 @@ func (cr *ClientRepository) FindByEmail(email string) (*model.Client, error) {
 }
 
 func (cr *ClientRepository) UpdateClient(client *model.Client) error {
-	stmt, err := cr.db.Prepare("update client set name = $1, email = $2, password = $3 where client_id = $4")
+	stmt, err := cr.db.Prepare("update client set name = $1, email = $2, password_hash = $3 where id = $4")
 	if err != nil {
 		return err
 	}
