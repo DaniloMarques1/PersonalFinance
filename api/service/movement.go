@@ -19,17 +19,14 @@ func NewMovementService(movementRepo model.IMovement) *MovementService {
 	}
 }
 
-func (ms *MovementService) SaveMovement(movementDto dto.AddMovementDto, wallet_id int64) (*dto.AddMovementResponseDto, error) {
-
-	// TODO check if there is a wallet for this client based on wallet_id and client_id
-	/*
-		TODO
-		adicionar método no repositorio do movement que vai buscar uma wallet que,
-		possua um wallet_id e um client_id, iguais aos recebidos via token e url param
-	*/
+func (ms *MovementService) SaveMovement(movementDto dto.AddMovementDto, walletId, clientId int64) (*dto.AddMovementResponseDto, error) {
+	_, err := ms.movementRepo.FindMovementWallet(walletId, clientId) // if returns error, means it did not find any wallet
+	if err != nil {
+		return nil, util.NewApiError("You do not have a wallet with that id", http.StatusNotFound)
+	}
 
 	if !movementDto.Deposit {
-		canWithDraw, err := ms.movementRepo.CanWithDraw(wallet_id, movementDto.Value)
+		canWithDraw, err := ms.movementRepo.CanWithDraw(walletId, movementDto.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -42,9 +39,9 @@ func (ms *MovementService) SaveMovement(movementDto dto.AddMovementDto, wallet_i
 		Description: movementDto.Description,
 		Value:       movementDto.Value,
 		Deposit:     movementDto.Deposit,
-		Wallet_id:   wallet_id,
+		Wallet_id:   walletId,
 	}
-	err := ms.movementRepo.SaveMovement(&movement)
+	err = ms.movementRepo.SaveMovement(&movement)
 	if err != nil {
 		log.Printf("Error saving movement %v\n", err)
 		return nil, err
@@ -55,8 +52,8 @@ func (ms *MovementService) SaveMovement(movementDto dto.AddMovementDto, wallet_i
 	return &movementResponse, nil
 }
 
-func (ms *MovementService) FindAll(wallet_id int64) (*dto.MovementsResponseDto, error) {
-	movements, err := ms.movementRepo.FindAll(wallet_id)
+func (ms *MovementService) FindAll(walletId int64) (*dto.MovementsResponseDto, error) {
+	movements, err := ms.movementRepo.FindAll(walletId)
 	if err != nil {
 		return nil, err
 	}

@@ -15,4 +15,5 @@ type IMovement interface {
 	SaveMovement(movement *Movement) error
 	FindAll(wallet_id int64) ([]Movement, error)
 	CanWithDraw(wallet_id int64, value float64) (bool, error)
+	FindMovementWallet(walletId, clientId int64) (*Wallet, error)
 }

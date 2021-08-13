@@ -85,4 +85,12 @@ func TestErrorSaveMovement(t *testing.T) {
 	require.Nil(err, "Should create request")
 	response = executeRequest(req)
 	require.Equal(http.StatusUnauthorized, response.Code, "Should return 401")
+
+	movementBody = `{"description": "Primeiro deposito", "value": 45.0, "deposit": true}`
+	req, err = http.NewRequest(http.MethodPost, fmt.Sprintf("/wallet/%v/movements", -2), strings.NewReader(movementBody))
+	require.Nil(err, "Should create request")
+	req.Header.Add("Authorization", "Bearer "+token)
+	response = executeRequest(req)
+	fmt.Println(response.Body.String())
+	require.Equal(http.StatusNotFound, response.Code, "Should return 404")
 }

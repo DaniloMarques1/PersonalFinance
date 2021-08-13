@@ -86,3 +86,19 @@ func (mr *MovementRepository) FindAll(wallet_id int64) ([]model.Movement, error)
 
 	return movements, nil
 }
+
+func (mr *MovementRepository) FindMovementWallet(walletId, clientId int64) (*model.Wallet, error) {
+	stmt, err := mr.db.Prepare("SELECT id, client_id FROM wallet WHERE id = $1 AND client_id = $2")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var wallet model.Wallet
+	err = stmt.QueryRow(walletId, clientId).Scan(&wallet.Id, &wallet.Client_id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &wallet, nil
+}

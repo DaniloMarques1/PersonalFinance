@@ -46,8 +46,13 @@ func (mh *MovementHandler) SaveMovement(w http.ResponseWriter, r *http.Request) 
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid Body"})
 		return
 	}
+	clientId, err := strconv.Atoi(r.Header.Get("userId"))
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
 
-	movementResponse, err := mh.movementService.SaveMovement(movementDto, int64(wallet_id))
+	movementResponse, err := mh.movementService.SaveMovement(movementDto, int64(wallet_id), int64(clientId))
 	if err != nil {
 		util.HandleError(w, err)
 		return
