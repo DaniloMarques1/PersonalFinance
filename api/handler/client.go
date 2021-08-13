@@ -100,7 +100,8 @@ func (ch *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	}
 	clientId, err := strconv.Atoi(r.Header.Get("client_id"))
 	if err != nil {
-		//
+		util.HandleError(w, err)
+		return
 	}
 	err = ch.clientService.UpdateClient(int64(clientId), updateClientDto)
 	if err != nil {
