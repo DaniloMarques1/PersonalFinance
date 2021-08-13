@@ -17,21 +17,58 @@ type Payload struct {
 	jwt.StandardClaims
 }
 
-const EXPIRES_TIME = 86400
+/*
+	each time token expires i will use refresh token to request a new one
+	and when returning a new token will also return a new refresh token.
+	if refresh token is invalid, just return 401
+*/
 
-func NewToken(id int64) (string, error) {
+const EXPIRES_TIME_TOKEN = 86400
+const EXPIRES_TIME_REFRESH_TOKEN = EXPIRES_TIME_TOKEN * 3
+
+// returns token and refresh token
+func NewToken(id int64) (string, string, error) {
 	now := time.Now()
-	claims := Payload{UserId: id, StandardClaims: jwt.StandardClaims{ExpiresAt: now.Unix() + EXPIRES_TIME}}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, err := token.SignedString([]byte(os.Getenv("JWT_KEY")))
+	tokenClaims := Payload{
+		UserId: id,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: now.Unix() + EXPIRES_TIME_TOKEN,
+		},
+	}
+	token, err := generateToken(tokenClaims)
+	if err != nil {
+		return "", "", err
+	}
+	refreshTokenClaims := Payload{
+		UserId: id,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: now.Unix() + EXPIRES_TIME_REFRESH_TOKEN,
+		},
+	}
 
-	return tokenStr, err
+	refreshToken, err := generateToken(refreshTokenClaims)
+	if err != nil {
+		return "", "", err
+	}
+
+	return token, refreshToken, nil
+}
+
+func generateToken(payload Payload) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	tokenStr, err := token.SignedString([]byte(os.Getenv("JWT_KEY")))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenStr, nil
 }
 
 func VerifyToken(tokenStr string) (int64, bool) {
-	token, err := jwt.ParseWithClaims(tokenStr, &Payload{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_KEY")), nil
-	})
+	token, err := jwt.ParseWithClaims(tokenStr, &Payload{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("JWT_KEY")), nil
+		})
 
 	if err != nil {
 		log.Printf("%v\n", err)

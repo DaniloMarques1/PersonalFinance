@@ -70,6 +70,22 @@ func (ch *ClientHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	util.RespondJson(w, http.StatusOK, sessionResponse)
 }
 
+func (ch *ClientHandler) RefreshSession(w http.ResponseWriter, r *http.Request) {
+	refreshToken := r.Header.Get("refresh_token")
+	clientId, valid := util.VerifyToken(refreshToken)
+	if !valid {
+		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "The given refresh token is not valid"})
+		return
+	}
+	session, err := ch.clientService.RefreshSession(clientId)
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	util.RespondJson(w, http.StatusOK, session)
+}
+
 func (ch *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	var updateClientDto dto.UpdateClientRequestDto
 	if err := json.NewDecoder(r.Body).Decode(&updateClientDto); err != nil {

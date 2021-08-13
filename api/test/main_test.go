@@ -75,26 +75,26 @@ func executeRequest(request *http.Request) *httptest.ResponseRecorder {
 	return rr
 }
 
-// returns a token
-func signIn(email, password string) (string, error) {
+// Should return the response dto
+func signIn(email, password string) (*dto.SessionResponseDto, error) {
 	loginBody := fmt.Sprintf(`{"email": "%v", "password": "%v"}`, email, password)
 	request, err := http.NewRequest(http.MethodPost, "/session", strings.NewReader(loginBody))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	response := executeRequest(request)
 	if response.Code != http.StatusOK {
-		return "", fmt.Errorf("Error Sign in")
+		return nil, fmt.Errorf("Error Sign in")
 	}
+
 	var session dto.SessionResponseDto
 	err = json.Unmarshal(response.Body.Bytes(), &session)
 	if err != nil {
-		fmt.Println(err)
-		return "", fmt.Errorf("Error getting response")
+		return nil, fmt.Errorf("Error getting response")
 	}
 
-	return session.Token, nil
+	return &session, nil
 }
 
 // add a new wallet

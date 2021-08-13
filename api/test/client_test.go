@@ -60,15 +60,13 @@ func TestCreateSession(t *testing.T) {
 
 	var sessionResponse dto.SessionResponseDto
 	json.Unmarshal(response.Body.Bytes(), &sessionResponse)
-	
-	fmt.Println(sessionResponse)
 
 	require.NotNil(sessionResponse, "sessionResponse must not be nil")
 	require.NotNil(sessionResponse.Token, "When creating a session should return a token")
-	//require.NotNil(sessionResponse.RefreshToken, "When creating session should return refresh token") // TODO
+	require.NotNil(sessionResponse.RefreshToken, "When creating session should return refresh token")
 	require.NotNil(sessionResponse.Client, "When creating a session should return the client")
-	require.Equal("fitz@gmail.com", sessionResponse.Client.Email, "Email shoud match")
 
+	require.Equal("fitz@gmail.com", sessionResponse.Client.Email, "Email shoud match")
 }
 
 func TestErrorCreateSession(t *testing.T) {
@@ -90,6 +88,32 @@ func TestErrorCreateSession(t *testing.T) {
 	require.Equal(http.StatusBadRequest, response.Code, "Should return bad request")
 }
 
+func TestRefreshToken(t *testing.T) {
+	clearTables()
+	require := require.New(t)
+
+	addClient(t, "Fitz", "fitz@gmail.com", "123456")
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(err, "Err should be nil")
+	require.NotNil(session, "Err should be nil")
+
+	req, err := http.NewRequest(http.MethodPut, "/session", nil)
+	require.Nil(err, "Err Should be nil")
+	req.Header.Add("refresh_token", session.RefreshToken)
+
+	response := executeRequest(req)
+	require.Equal(http.StatusOK, response.Code)
+	var nSession dto.SessionResponseDto
+	json.Unmarshal(response.Body.Bytes(), &nSession)
+
+	require.NotNil(nSession, "Session should be the returned body")
+	require.NotNil(nSession.RefreshToken, "should have a refresh token")
+	require.NotNil(nSession.Token, "Should have a token")
+	require.NotNil(nSession.Client, "Should have a client")
+
+	fmt.Printf("session %v\n", nSession)
+}
+
 func TestUpdateClient(t *testing.T) {
 	clearTables()
 	require := require.New(t)
@@ -97,9 +121,14 @@ func TestUpdateClient(t *testing.T) {
 	response := addClient(t, "Fitz", "fitz@gmail.com", "123456")
 	require.Equal(response.Code, http.StatusCreated, "Status should be 201")
 
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(err, "Err should be nil")
+	token := session.Token
+
 	body := `{"name": "Fitz Calvary", "email": "fitz@gmail.com", "password": "123456", "confirm_password": "123456"}`
 
 	request, err := http.NewRequest(http.MethodPut, "/client", strings.NewReader(body))
+	request.Header.Add("Authorization", "Bearer "+token)
 	require.Nil(err, "Error Should be nil")
 
 	response = executeRequest(request)
@@ -115,12 +144,19 @@ func TestErrorUpdateClient(t *testing.T) {
 	password := "123456"
 	confirmPassword := "different_password"
 
+	response := addClient(t, "Fitz", "fitz@gmail.com", "123456")
+	require.Equal(response.Code, http.StatusCreated, "Status should be 201")
+
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(err, "Err should be nil")
+	token := session.Token
+
 	body := fmt.Sprintf(`{"name": "%v", "email": "%v", "password": "%v", "confirm_password": "%v"}`,
 		name, email, password, confirmPassword)
 	request, err := http.NewRequest(http.MethodPut, "/client", strings.NewReader(body))
+	request.Header.Add("Authorization", "Bearer "+token)
 	require.Nil(err, "Error Should be nil")
 
-	response := executeRequest(request)
-	fmt.Println(response.Body.String())
+	response = executeRequest(request)
 	require.Equal(http.StatusBadRequest, response.Code, "Should return 400")
 }

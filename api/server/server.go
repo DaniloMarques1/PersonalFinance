@@ -94,8 +94,8 @@ func (app *App) Initialize(db DbConn) {
 		clientHandler.SaveClient).Methods(http.MethodPost)
 	app.Router.HandleFunc("/session",
 		clientHandler.CreateSession).Methods(http.MethodPost)
-	app.Router.HandleFunc("/client",
-		clientHandler.UpdateClient).Methods(http.MethodPut)
+	app.Router.HandleFunc("/session",
+		clientHandler.RefreshSession).Methods(http.MethodPut)
 
 	app.Router.Handle("/client",
 		util.AuthorizationMiddleware(http.HandlerFunc(clientHandler.UpdateClient))).Methods(http.MethodPut)

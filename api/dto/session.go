@@ -8,6 +8,7 @@ type SessionRequestDto struct {
 }
 
 type SessionResponseDto struct {
-	Client *model.Client `json:"client"`
-	Token  string        `json:"token"`
+	Client       *model.Client `json:"client"`
+	Token        string        `json:"token"`
+	RefreshToken string        `json:"refresh_token"`
 }

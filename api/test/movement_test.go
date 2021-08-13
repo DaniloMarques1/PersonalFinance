@@ -16,8 +16,11 @@ func TestSaveMovement(t *testing.T) {
 	require := require.New(t)
 
 	addClient(t, "Fitz", "fitz@gmail.com", "123456")
-	token, err := signIn("fitz@gmail.com", "123456")
-	require.Nil(err, "Should return token")
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(err, "Err should be nil")
+	require.NotNil(session, "Session should not be nil")
+
+	token := session.Token
 
 	walletResponse, err := addWallet(token)
 	require.Nil(err, "Should have created wallet")
@@ -43,7 +46,12 @@ func TestErrorSaveMovement(t *testing.T) {
 	require := require.New(t)
 
 	addClient(t, "Fitz", "fitz@gmail.com", "123456")
-	token, err := signIn("fitz@gmail.com", "123456")
+
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(err, "Err should be nil")
+	require.NotNil(session, "Session should not be nil")
+
+	token := session.Token
 
 	walletResponse, err := addWallet(token)
 	require.Nil(err, "Should have created wallet")

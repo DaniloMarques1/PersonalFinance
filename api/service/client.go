@@ -60,12 +60,35 @@ func (cs *ClientService) CreateSession(sessionDto dto.SessionRequestDto) (*dto.S
 		return nil, util.NewApiError("Wrong password", http.StatusUnauthorized)
 	}
 
-	token, err := util.NewToken(client.Id)
+	token, refreshToken, err := util.NewToken(client.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.SessionResponseDto{Client: client, Token: token}, nil
+	return &dto.SessionResponseDto{
+		Client:       client,
+		Token:        token,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (cs *ClientService) RefreshSession(clientId int64) (*dto.SessionResponseDto, error) {
+	client, err := cs.clientRepo.FindById(clientId)
+	if err != nil {
+		return nil, err
+	}
+
+	token, refreshToken, err := util.NewToken(clientId)
+	if err != nil {
+		return nil, err
+	}
+	session := dto.SessionResponseDto{
+		Client:       client,
+		Token:        token,
+		RefreshToken: refreshToken,
+	}
+
+	return &session, nil
 }
 
 func (cs *ClientService) UpdateClient(clientId int64, updateClientDto dto.UpdateClientRequestDto) error {
@@ -79,9 +102,9 @@ func (cs *ClientService) UpdateClient(clientId int64, updateClientDto dto.Update
 	}
 
 	client := model.Client{
-		Id: clientId,
-		Name: updateClientDto.Name,
-		Email: updateClientDto.Email,
+		Id:           clientId,
+		Name:         updateClientDto.Name,
+		Email:        updateClientDto.Email,
 		PasswordHash: passwordHash,
 	}
 

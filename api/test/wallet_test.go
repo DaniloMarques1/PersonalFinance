@@ -13,10 +13,12 @@ import (
 
 func TestSaveWallet(t *testing.T) {
 	addClient(t, "Fitz", "fitz@gmail.com", "123456")
-	token, err := signIn("fitz@gmail.com", "123456")
 
-	require.Nil(t, err, "Should create a user")
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(t, err, "Err should be nil")
+	require.NotNil(t, session, "Session should not be nil")
 
+	token := session.Token
 	walletBody := `{"name": "Testando 1", "description": "Description 1"}`
 	request, err := http.NewRequest(http.MethodPost, "/wallet", strings.NewReader(walletBody))
 	require.Nil(t, err, "Error creating wallet request")
@@ -36,7 +38,11 @@ func TestSaveWallet(t *testing.T) {
 
 func TestErrorSaveWallet(t *testing.T) {
 	addClient(t, "Fitz", "fitz@gmail.com", "123456")
-	token, err := signIn("fitz@gmail.com", "123456")
+
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(t, err, "Err should be nil")
+	require.NotNil(t, session, "Session should not be nil")
+	token := session.Token
 
 	walletBody := `{"name": "", "description": "Description 1"}`
 	request, err := http.NewRequest(http.MethodPost, "/wallet", strings.NewReader(walletBody))
@@ -59,9 +65,12 @@ func TestRemoveWallet(t *testing.T) {
 	require := require.New(t)
 
 	addClient(t, "Fitz", "fitz@gmail.com", "123456")
-	token, err := signIn("fitz@gmail.com", "123456")
-	require.Nil(err, "Should have created and signed the user")
-	require.NotEqual(token, "", "Should have returned a token")
+
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(err, "Err should be nil")
+	require.NotNil(session, "Session should not be nil")
+
+	token := session.Token
 
 	walletResponse, err := addWallet(token)
 	require.Nil(err, "Error should be nil")

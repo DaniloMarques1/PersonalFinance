@@ -22,6 +22,11 @@ func NewMovementService(movementRepo model.IMovement) *MovementService {
 func (ms *MovementService) SaveMovement(movementDto dto.AddMovementDto, wallet_id int64) (*dto.AddMovementResponseDto, error) {
 
 	// TODO check if there is a wallet for this client based on wallet_id and client_id
+	/*
+		TODO
+		adicionar método no repositorio do movement que vai buscar uma wallet que,
+		possua um wallet_id e um client_id, iguais aos recebidos via token e url param
+	*/
 
 	if !movementDto.Deposit {
 		canWithDraw, err := ms.movementRepo.CanWithDraw(wallet_id, movementDto.Value)
