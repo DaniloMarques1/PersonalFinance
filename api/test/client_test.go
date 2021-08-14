@@ -132,6 +132,7 @@ func TestUpdateClient(t *testing.T) {
 	require.Nil(err, "Error Should be nil")
 
 	response = executeRequest(request)
+	fmt.Println(response.Body.String())
 	require.Equal(http.StatusNoContent, response.Code, "Status should be 204")
 }
 
@@ -158,5 +159,6 @@ func TestErrorUpdateClient(t *testing.T) {
 	require.Nil(err, "Error Should be nil")
 
 	response = executeRequest(request)
+	fmt.Println(response.Body.String())
 	require.Equal(http.StatusBadRequest, response.Code, "Should return 400")
 }

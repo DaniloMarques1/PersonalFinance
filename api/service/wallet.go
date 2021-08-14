@@ -2,9 +2,11 @@ package service
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/danilomarques1/personalfinance/api/dto"
 	"github.com/danilomarques1/personalfinance/api/model"
+	"github.com/danilomarques1/personalfinance/api/util"
 )
 
 type WalletService struct {
@@ -50,4 +52,23 @@ func (ws *WalletService) FindAll(client_id int64) (*dto.WalletsResponseDto, erro
 	}
 
 	return &dto.WalletsResponseDto{Wallets: wallets, Total: total}, nil
+}
+
+func (ws *WalletService) UpdateWallet(walletUpdate dto.WalletUpdateRequestDto, walletId, clientId int64) error {
+	_, err := ws.walletRepo.FindById(walletId, clientId)
+	if err != nil {
+		return util.NewApiError("Wallet not found", http.StatusNotFound)
+	}
+	wallet := model.Wallet{
+		Id:          walletId,
+		Name:        walletUpdate.Name,
+		Description: walletUpdate.Description,
+		Client_id:   clientId,
+	}
+	err = ws.walletRepo.UpdateWallet(&wallet)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

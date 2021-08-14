@@ -55,7 +55,11 @@ func (wh *WalletHandler) SaveWallet(w http.ResponseWriter, r *http.Request) {
 
 func (wh *WalletHandler) RemoveWallet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	wallet_id, _ := strconv.Atoi(vars["wallet_id"])
+	wallet_id, err := strconv.Atoi(vars["wallet_id"])
+	if err != nil {
+		util.RespondJson(w, http.StatusBadRequest, "Invalid params")
+		return
+	}
 	client_id, err := strconv.Atoi(r.Header.Get("userId"))
 	if err != nil {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Missing token"})
@@ -87,4 +91,39 @@ func (wh *WalletHandler) FindAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	util.RespondJson(w, http.StatusOK, walletsResponse)
+}
+
+func (wh *WalletHandler) UpdateWallet(w http.ResponseWriter, r *http.Request) {
+	clientId, err := strconv.Atoi(r.Header.Get("userId"))
+	if err != nil {
+		util.RespondJson(w, http.StatusUnauthorized, &dto.ErrorResponseDto{Message: "Missing token"})
+		return
+	}
+
+	vars := mux.Vars(r)
+	walletId, err := strconv.Atoi(vars["wallet_id"])
+	if err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid params"})
+		return
+	}
+
+	var walletUpdate dto.WalletUpdateRequestDto
+	if err := json.NewDecoder(r.Body).Decode(&walletUpdate); err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
+		return
+	}
+	defer r.Body.Close()
+
+	if err := wh.validate.Struct(walletUpdate); err != nil {
+		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
+		return
+	}
+
+	err = wh.walletService.UpdateWallet(walletUpdate, int64(walletId), int64(clientId))
+	if err != nil {
+		util.HandleError(w, err)
+		return
+	}
+
+	util.RespondJson(w, http.StatusNoContent, nil)
 }

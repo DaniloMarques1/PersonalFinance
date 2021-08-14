@@ -15,5 +15,6 @@ type IWallet interface {
 	SaveWallet(*Wallet) error
 	RemoveWallet(int64, int64) error
 	FindAll(int64) ([]Wallet, float64, error)
+	UpdateWallet(*Wallet) error
 	FindById(int64, int64) (*Wallet, error)
 }

@@ -98,7 +98,7 @@ func (ch *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 		util.RespondJson(w, http.StatusBadRequest, &dto.ErrorResponseDto{Message: "Invalid body"})
 		return
 	}
-	clientId, err := strconv.Atoi(r.Header.Get("client_id"))
+	clientId, err := strconv.Atoi(r.Header.Get("userId"))
 	if err != nil {
 		util.HandleError(w, err)
 		return
@@ -110,5 +110,5 @@ func (ch *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	util.RespondJson(w, http.StatusNoContent, nil)
 }

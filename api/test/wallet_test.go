@@ -84,3 +84,55 @@ func TestRemoveWallet(t *testing.T) {
 
 	require.Equal(http.StatusNoContent, response.Code)
 }
+
+func TestUpdateWallet(t *testing.T) {
+	clearTables()
+	require := require.New(t)
+
+	addClient(t, "Fitz", "fitz@gmail.com", "123456")
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(err, "Err should be nil")
+	require.NotEqual(session.Token, "")
+
+	token := session.Token
+	walletResponse, err := addWallet(token)
+	require.Nil(err, "Should have created wallet")
+
+	updateBody := `{"name": "New wallet name", "description": "new wallet description"}`
+	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/wallet/%v", walletResponse.Wallet.Id), strings.NewReader(updateBody))
+	req.Header.Add("Authorization", "Bearer "+token)
+	require.Nil(err, "Should have created the request")
+
+	response := executeRequest(req)
+	fmt.Println(response.Body.String())
+	require.Equal(http.StatusNoContent, response.Code)
+}
+
+func TestErrorUpdateWallet(t *testing.T) {
+	clearTables()
+	require := require.New(t)
+
+	addClient(t, "Fitz", "fitz@gmail.com", "123456")
+	session, err := signIn("fitz@gmail.com", "123456")
+	require.Nil(err, "Err should be nil")
+	require.NotEqual(session.Token, "")
+
+	token := session.Token
+	walletResponse, err := addWallet(token)
+	require.Nil(err, "Should have created wallet")
+
+	updateBody := `{"ame": "New wallet name", "description": "new wallet description"}`
+	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/wallet/%v", walletResponse.Wallet.Id), strings.NewReader(updateBody))
+	req.Header.Add("Authorization", "Bearer "+token)
+	require.Nil(err, "Should have created the request")
+	response := executeRequest(req)
+
+	require.Equal(http.StatusBadRequest, response.Code)
+
+	updateBody = `{"name": "New wallet name", "description": "new wallet description"}`
+	req, err = http.NewRequest(http.MethodPut, fmt.Sprintf("/wallet/%v", walletResponse.Wallet.Id), strings.NewReader(updateBody))
+	require.Nil(err, "Should have created the request")
+	response = executeRequest(req)
+
+	require.Equal(http.StatusUnauthorized, response.Code)
+}

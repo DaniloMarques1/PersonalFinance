@@ -126,8 +126,24 @@ func (wr *WalletRepository) FindAll(client_id int64) ([]model.Wallet, float64, e
 	return wallets, total, nil
 }
 
+func (wr *WalletRepository) UpdateWallet(wallet *model.Wallet) error {
+	stmt, err := wr.db.Prepare("UPDATE wallet SET name = $1, description = $2 WHERE id  = $3")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(wallet.Name, wallet.Description, wallet.Id)
+	if err != nil {
+		log.Printf("Error updating %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
 func (wr *WalletRepository) FindById(wallet_id, client_id int64) (*model.Wallet, error) {
-	stmt, err := wr.db.Prepare("SELECT id FROM wallet WHERE id = $1 AND client_id = $2)")
+	stmt, err := wr.db.Prepare("SELECT id FROM wallet WHERE id = $1 AND client_id = $2")
 	if err != nil {
 		log.Printf("Error preparing find by id %v", err)
 		return nil, err
@@ -144,3 +160,4 @@ func (wr *WalletRepository) FindById(wallet_id, client_id int64) (*model.Wallet,
 
 	return &wallet, nil
 }
+
